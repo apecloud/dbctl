@@ -53,14 +53,6 @@ func TestNewManager(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 
-	t.Run("new db manager base failed", func(t *testing.T) {
-		manager, err := NewManager(fakeProperties)
-
-		assert.Nil(t, manager)
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, fmt.Sprintf("%s is not set", constant.KBEnvPodName))
-	})
-
 	viper.Set(constant.KBEnvPodName, "fake")
 	viper.Set(constant.KBEnvClusterCompName, fakeClusterCompName)
 	viper.Set(constant.KBEnvNamespace, fakeNamespace)

@@ -57,38 +57,6 @@ func NewManager(properties engines.Properties) (engines.DBManager, error) {
 	return Mgr, nil
 }
 
-func (mgr *Manager) GetDBState(ctx context.Context, cluster *dcs.Cluster) *dcs.DBState {
-	mgr.DBState = nil
-	mgr.UnsetIsLeader()
-	dbState := &dcs.DBState{
-		Extra: map[string]string{},
-	}
-
-	isLeader, err := mgr.IsLeader(ctx, cluster)
-	if err != nil {
-		mgr.Logger.Error(err, "check is leader failed")
-		return nil
-	}
-	mgr.SetIsLeader(isLeader)
-
-	memberAddrs := mgr.GetMemberAddrs(ctx, cluster)
-	if memberAddrs == nil {
-		mgr.Logger.Error(nil, "get member addrs failed")
-		return nil
-	}
-	mgr.memberAddrs = memberAddrs
-
-	healthStatus, err := mgr.getMemberHealthStatus(ctx, cluster, cluster.GetMemberWithName(mgr.CurrentMemberName))
-	if err != nil {
-		mgr.Logger.Error(err, "get member health status failed")
-		return nil
-	}
-	mgr.healthStatus = healthStatus
-
-	mgr.DBState = dbState
-	return dbState
-}
-
 func (mgr *Manager) IsLeader(ctx context.Context, _ *dcs.Cluster) (bool, error) {
 	isSet, isLeader := mgr.GetIsLeader()
 	if isSet {
@@ -104,7 +72,7 @@ func (mgr *Manager) IsLeaderWithHost(ctx context.Context, host string) (bool, er
 		return false, errors.Errorf("check is leader with host:%s failed, err:%v", host, err)
 	}
 
-	return role == models.LEADER, nil
+	return role == strings.ToLower(models.LEADER), nil
 }
 
 func (mgr *Manager) IsDBStartupReady() bool {
@@ -144,116 +112,20 @@ func (mgr *Manager) isConsensusReadyUp(ctx context.Context) bool {
 	return resMap[0]["extname"] != nil
 }
 
-func (mgr *Manager) IsClusterInitialized(ctx context.Context, _ *dcs.Cluster) (bool, error) {
-	if !mgr.IsFirstMember() {
-		mgr.Logger.Info("I am not the first member, just skip and wait for the first member to initialize the cluster.")
-		return true, nil
-	}
-
-	if !mgr.IsDBStartupReady() {
-		return false, nil
-	}
-
-	sql := `SELECT usename FROM pg_user WHERE usename = 'replicator';`
-	resp, err := mgr.Query(ctx, sql)
-	if err != nil {
-		mgr.Logger.Error(err, fmt.Sprintf("query sql:%s failed", sql))
-		return false, err
-	}
-
-	resMap, err := postgres.ParseQuery(string(resp))
-	if err != nil {
-		mgr.Logger.Error(err, fmt.Sprintf("parse query response:%s failed", string(resp)))
-		return false, err
-	}
-
-	return resMap[0]["usename"] != nil, nil
-}
-
-func (mgr *Manager) InitializeCluster(ctx context.Context, _ *dcs.Cluster) error {
-	sql := "create role replicator with superuser login password 'replicator';" +
-		"create extension if not exists consensus_monitor;"
-
-	_, err := mgr.Exec(ctx, sql)
-	return err
-}
-
 func (mgr *Manager) GetMemberRoleWithHost(ctx context.Context, host string) (string, error) {
-	sql := `select paxos_role from consensus_member_status;`
+	sql := `select role from consensus_member_status;`
 
 	resp, err := mgr.QueryWithHost(ctx, sql, host)
 	if err != nil {
-		mgr.Logger.Error(err, fmt.Sprintf("query sql:%s failed", sql))
 		return "", err
 	}
 
 	resMap, err := postgres.ParseQuery(string(resp))
 	if err != nil {
-		mgr.Logger.Error(err, fmt.Sprintf("parse query response:%s failed", string(resp)))
 		return "", err
 	}
 
-	// TODO:paxos roles are currently represented by numbers, will change to string in the future
-	var role string
-	switch cast.ToInt(resMap[0]["paxos_role"]) {
-	case 0:
-		role = models.FOLLOWER
-	case 1:
-		role = models.CANDIDATE
-	case 2:
-		role = models.LEADER
-	case 3:
-		role = models.LEARNER
-	default:
-		mgr.Logger.Info(fmt.Sprintf("get invalid role number:%d", cast.ToInt(resMap[0]["paxos_role"])))
-		role = ""
-	}
-
-	return role, nil
-}
-
-func (mgr *Manager) GetMemberAddrs(ctx context.Context, cluster *dcs.Cluster) []string {
-	if mgr.DBState != nil && mgr.memberAddrs != nil {
-		return mgr.memberAddrs
-	}
-
-	sql := `select ip_port from consensus_cluster_status;`
-	resp, err := mgr.QueryLeader(ctx, sql, cluster)
-	if err != nil {
-		mgr.Logger.Error(err, fmt.Sprintf("query %s with leader failed", sql))
-		return nil
-	}
-
-	result, err := postgres.ParseQuery(string(resp))
-	if err != nil {
-		mgr.Logger.Error(err, fmt.Sprintf("parse query response:%s failed", string(resp)))
-		return nil
-	}
-
-	var addrs []string
-	for _, m := range result {
-		addrs = append(addrs, strings.Split(cast.ToString(m["ip_port"]), ":")[0])
-	}
-
-	return addrs
-}
-
-func (mgr *Manager) GetMemberAddrWithName(ctx context.Context, cluster *dcs.Cluster, memberName string) string {
-	addrs := mgr.GetMemberAddrs(ctx, cluster)
-	for _, addr := range addrs {
-		if strings.HasPrefix(addr, memberName) {
-			return addr
-		}
-	}
-	return ""
-}
-
-func (mgr *Manager) IsCurrentMemberInCluster(ctx context.Context, cluster *dcs.Cluster) bool {
-	return mgr.GetMemberAddrWithName(ctx, cluster, mgr.CurrentMemberName) != ""
-}
-
-func (mgr *Manager) IsCurrentMemberHealthy(ctx context.Context, cluster *dcs.Cluster) bool {
-	return mgr.IsMemberHealthy(ctx, cluster, cluster.GetMemberWithName(mgr.CurrentMemberName))
+	return strings.ToLower(cast.ToString(resMap[0]["role"])), nil
 }
 
 // IsMemberHealthy firstly get the leader's connection pool,
@@ -299,19 +171,6 @@ func (mgr *Manager) getMemberHealthStatus(ctx context.Context, cluster *dcs.Clus
 	return res, nil
 }
 
-func (mgr *Manager) IsMemberLagging(ctx context.Context, cluster *dcs.Cluster, member *dcs.Member) (bool, int64) {
-	healthStatus, err := mgr.getMemberHealthStatus(ctx, cluster, member)
-	if errors.Is(err, postgres.ClusterHasNoLeader) {
-		mgr.Logger.Info("cluster has no leader, so member has no lag")
-		return false, 0
-	} else if err != nil {
-		mgr.Logger.Error(err, "check member lag failed")
-		return true, cluster.HaConfig.GetMaxLagOnSwitchover() + 1
-	}
-
-	return healthStatus.LogDelayNum > cluster.HaConfig.GetMaxLagOnSwitchover(), healthStatus.LogDelayNum
-}
-
 func (mgr *Manager) JoinCurrentMemberToCluster(ctx context.Context, cluster *dcs.Cluster) error {
 	// use the env KB_POD_FQDN consistently with the startup script
 	sql := fmt.Sprintf(`alter system consensus add follower '%s:%d';`,
@@ -335,80 +194,6 @@ func (mgr *Manager) LeaveMemberFromCluster(ctx context.Context, _ *dcs.Cluster, 
 	if err != nil {
 		mgr.Logger.Error(err, fmt.Sprintf("exec sql:%s failed", sql))
 		return err
-	}
-
-	return nil
-}
-
-// IsClusterHealthy considers the health status of the cluster equivalent to the health status of the leader
-func (mgr *Manager) IsClusterHealthy(ctx context.Context, cluster *dcs.Cluster) bool {
-	leaderMember := cluster.GetLeaderMember()
-	if leaderMember == nil {
-		mgr.Logger.Info("cluster has no leader, wait for leader to take the lock")
-		// when cluster has no leader, the health status of the cluster is assumed to be true by default,
-		// in order to proceed with the logic of competing for the leader lock
-		return true
-	}
-
-	if leaderMember.Name == mgr.CurrentMemberName {
-		// if the member is leader, then its health status will check in IsMemberHealthy later
-		return true
-	}
-
-	return mgr.IsMemberHealthy(ctx, cluster, leaderMember)
-}
-
-func (mgr *Manager) Promote(ctx context.Context, cluster *dcs.Cluster) error {
-	if isLeader, err := mgr.IsLeader(ctx, nil); isLeader && err == nil {
-		mgr.Logger.Info("i am already the leader, don't need to promote")
-		return nil
-	}
-
-	currentLeaderAddr, err := mgr.GetLeaderAddr(ctx)
-	if err != nil {
-		return err
-	}
-
-	currentMemberAddr := mgr.GetMemberAddrWithName(ctx, cluster, mgr.CurrentMemberName)
-	if currentMemberAddr == "" {
-		return errors.New("get current member addr failed")
-	}
-
-	promoteSQL := fmt.Sprintf(`alter system consensus CHANGE LEADER TO '%s:%d';`, currentMemberAddr, mgr.Config.GetDBPort())
-	_, err = mgr.ExecWithHost(ctx, promoteSQL, currentLeaderAddr)
-	if err != nil {
-		mgr.Logger.Error(err, fmt.Sprintf("exec sql:%s failed", promoteSQL))
-		return err
-	}
-
-	return nil
-}
-
-func (mgr *Manager) IsPromoted(ctx context.Context) bool {
-	isLeader, _ := mgr.IsLeader(ctx, nil)
-	return isLeader
-}
-
-func (mgr *Manager) Follow(_ context.Context, cluster *dcs.Cluster) error {
-	mgr.Logger.Info("current member still follow the leader", "leader name", cluster.Leader.Name)
-	return nil
-}
-
-func (mgr *Manager) HasOtherHealthyLeader(ctx context.Context, cluster *dcs.Cluster) *dcs.Member {
-	if isLeader, err := mgr.IsLeader(ctx, cluster); isLeader && err == nil {
-		// I am the leader, just return nil
-		return nil
-	}
-
-	host, err := mgr.GetLeaderAddr(ctx)
-	if err != nil {
-		mgr.Logger.Error(err, "get leader addr failed")
-		return nil
-	}
-
-	leaderName := strings.Split(host, ".")[0]
-	if len(leaderName) > 0 {
-		return cluster.GetMemberWithName(leaderName)
 	}
 
 	return nil
