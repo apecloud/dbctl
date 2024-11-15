@@ -71,42 +71,6 @@ func NewManager(properties map[string]string) (engines.DBManager, error) {
 	return mgr, nil
 }
 
-func (mgr *Manager) IsRunning() bool {
-	if mgr.Proc != nil {
-		if isRunning, err := mgr.Proc.IsRunning(); isRunning && err == nil {
-			return true
-		}
-		mgr.Proc = nil
-	}
-
-	return mgr.newProcessFromPidFile() == nil
-}
-
-func (mgr *Manager) newProcessFromPidFile() error {
-	pidFile, err := readPidFile(mgr.DataDir)
-	if err != nil {
-		mgr.Logger.Error(err, "read pid file failed, err")
-		return err
-	}
-
-	proc, err := process.NewProcess(pidFile.pid)
-	if err != nil {
-		mgr.Logger.Error(err, "new process failed, err")
-		return err
-	}
-
-	mgr.Proc = proc
-	return nil
-}
-
-func (mgr *Manager) Recover(context.Context, *dcs.Cluster) error {
-	return nil
-}
-
-func (mgr *Manager) GetHealthiestMember(*dcs.Cluster, string) *dcs.Member {
-	return nil
-}
-
 func (mgr *Manager) SetIsLeader(isLeader bool) {
 	if isLeader {
 		mgr.isLeader = 1
@@ -221,8 +185,4 @@ func (mgr *Manager) Unlock(ctx context.Context) error {
 
 	mgr.Logger.Info("UnLock db success")
 	return nil
-}
-
-func (mgr *Manager) ShutDownWithWait() {
-	mgr.Pool.Close()
 }

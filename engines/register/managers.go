@@ -42,6 +42,7 @@ import (
 	"github.com/apecloud/dbctl/engines/polardbx"
 	"github.com/apecloud/dbctl/engines/postgres"
 	"github.com/apecloud/dbctl/engines/postgres/apecloudpostgres"
+	"github.com/apecloud/dbctl/engines/postgres/vanillapostgres"
 	"github.com/apecloud/dbctl/engines/pulsar"
 	"github.com/apecloud/dbctl/engines/redis"
 	"github.com/apecloud/dbctl/engines/wesql"
