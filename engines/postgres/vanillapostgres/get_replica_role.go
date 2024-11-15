@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package officalpostgres
+package vanillapostgres
 
 import (
 	"context"
@@ -25,6 +25,6 @@ import (
 	"github.com/apecloud/dbctl/dcs"
 )
 
-func (mgr *Manager) GetReplicaRole(ctx context.Context, cluster *dcs.Cluster) (string, error) {
+func (mgr *Manager) GetReplicaRole(ctx context.Context, _ *dcs.Cluster) (string, error) {
 	return mgr.GetMemberRoleWithHost(ctx, "")
 }

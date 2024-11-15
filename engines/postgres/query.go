@@ -163,22 +163,6 @@ func (mgr *Manager) ExecLeader(ctx context.Context, sql string, cluster *dcs.Clu
 	return mgr.ExecWithHost(ctx, sql, host)
 }
 
-func (mgr *Manager) GetPgCurrentSetting(ctx context.Context, setting string) (string, error) {
-	sql := fmt.Sprintf(`select pg_catalog.current_setting('%s');`, setting)
-
-	resp, err := mgr.Query(ctx, sql)
-	if err != nil {
-		return "", err
-	}
-
-	resMap, err := ParseQuery(string(resp))
-	if err != nil {
-		return "", err
-	}
-
-	return cast.ToString(resMap[0]["current_setting"]), nil
-}
-
 func parseRows(rows pgx.Rows) (result []byte, err error) {
 	rs := make([]interface{}, 0)
 	columnTypes := rows.FieldDescriptions()

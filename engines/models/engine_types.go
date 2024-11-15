@@ -25,7 +25,7 @@ const (
 	MySQL              EngineType = "mysql"
 	WeSQL              EngineType = "wesql"
 	PostgreSQL         EngineType = "postgresql"
-	OfficialPostgreSQL EngineType = "official-postgresql"
+	VanillaPostgreSQL  EngineType = "vanilla-postgresql"
 	ApecloudPostgreSQL EngineType = "apecloud-postgresql"
 	Redis              EngineType = "redis"
 	ETCD               EngineType = "etcd"
@@ -45,7 +45,7 @@ func GetEngineTypeList() []EngineType {
 		MySQL,
 		WeSQL,
 		PostgreSQL,
-		OfficialPostgreSQL,
+		VanillaPostgreSQL,
 		ApecloudPostgreSQL,
 		Redis,
 		ETCD,

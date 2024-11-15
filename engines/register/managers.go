@@ -42,7 +42,7 @@ import (
 	"github.com/apecloud/dbctl/engines/polardbx"
 	"github.com/apecloud/dbctl/engines/postgres"
 	"github.com/apecloud/dbctl/engines/postgres/apecloudpostgres"
-	"github.com/apecloud/dbctl/engines/postgres/officalpostgres"
+	"github.com/apecloud/dbctl/engines/postgres/vanillapostgres"
 	"github.com/apecloud/dbctl/engines/pulsar"
 	"github.com/apecloud/dbctl/engines/redis"
 	"github.com/apecloud/dbctl/engines/wesql"
@@ -64,7 +64,7 @@ func init() {
 	RegisterEngine(models.ETCD, "consensus", etcd.NewManager, nil)
 	RegisterEngine(models.MongoDB, "consensus", mongodb.NewManager, mongodb.NewCommands)
 	RegisterEngine(models.PolarDBX, "consensus", polardbx.NewManager, mysql.NewCommands)
-	RegisterEngine(models.PostgreSQL, "replication", officalpostgres.NewManager, postgres.NewCommands)
+	RegisterEngine(models.PostgreSQL, "replication", vanillapostgres.NewManager, postgres.NewCommands)
 	RegisterEngine(models.PostgreSQL, "consensus", apecloudpostgres.NewManager, postgres.NewCommands)
 	RegisterEngine(models.FoxLake, "", nil, foxlake.NewCommands)
 	RegisterEngine(models.Nebula, "", nil, nebula.NewCommands)
@@ -81,8 +81,8 @@ func init() {
 	RegisterEngine(models.ETCD, "", etcd.NewManager, nil)
 	RegisterEngine(models.MongoDB, "", mongodb.NewManager, mongodb.NewCommands)
 	RegisterEngine(models.PolarDBX, "", polardbx.NewManager, mysql.NewCommands)
-	RegisterEngine(models.PostgreSQL, "", officalpostgres.NewManager, postgres.NewCommands)
-	RegisterEngine(models.OfficialPostgreSQL, "", officalpostgres.NewManager, postgres.NewCommands)
+	RegisterEngine(models.PostgreSQL, "", vanillapostgres.NewManager, postgres.NewCommands)
+	RegisterEngine(models.VanillaPostgreSQL, "", vanillapostgres.NewManager, postgres.NewCommands)
 	RegisterEngine(models.ApecloudPostgreSQL, "", apecloudpostgres.NewManager, postgres.NewCommands)
 }
 
