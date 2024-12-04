@@ -37,8 +37,9 @@ const (
 	EnvRootUser   = "REDIS_DEFAULT_USER"
 	EnvRootPasswd = "REDIS_DEFAULT_PASSWORD"
 
-	EnvRedisHostNetworkPort         = "REDIS_HOST_NETWORK_PORT"
-	EnvRedisSentinelHostNetworkPort = "REDIS_SENTINEL_HOST_NETWORK_PORT"
+	EnvRedisHostNetworkPort         = "DBCTL_REDIS_HOST_NETWORK_PORT"
+	EnvRedisSentinelHostNetworkPort = "DBCTL_REDIS_SENTINEL_HOST_NETWORK_PORT"
+	EnvRedisClusterHostNetworkPort  = "DBCTL_REDIS_CLUSTER_HOST_NETWORK_PORT"
 )
 
 var (
@@ -79,6 +80,8 @@ func NewManager(properties engines.Properties) (engines.DBManager, error) {
 
 	if viper.IsSet(EnvRedisHostNetworkPort) {
 		properties["redisHost"] = fmt.Sprintf("127.0.0.1:%s", viper.GetString(EnvRedisHostNetworkPort))
+	} else if viper.IsSet(EnvRedisClusterHostNetworkPort) {
+		properties["redisHost"] = fmt.Sprintf("127.0.0.1:%s", viper.GetString(EnvRedisClusterHostNetworkPort))
 	}
 
 	managerBase, err := engines.NewDBManagerBase(logger)
