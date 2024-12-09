@@ -21,6 +21,7 @@ package redis
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -35,6 +36,9 @@ import (
 const (
 	EnvRootUser   = "REDIS_DEFAULT_USER"
 	EnvRootPasswd = "REDIS_DEFAULT_PASSWORD"
+
+	EnvRedisServicePort         = "DBCTL_REDIS_SERVICE_PORT"
+	EnvRedisSentinelServicePort = "DBCTL_REDIS_SENTINEL_SERVICE_PORT"
 )
 
 var (
@@ -71,6 +75,10 @@ func NewManager(properties engines.Properties) (engines.DBManager, error) {
 		redisPasswd = viper.GetString(constant.KBEnvServicePassword)
 	} else if viper.IsSet(EnvRootPasswd) {
 		redisPasswd = viper.GetString(EnvRootPasswd)
+	}
+
+	if viper.IsSet(EnvRedisServicePort) {
+		properties["redisHost"] = fmt.Sprintf("127.0.0.1:%s", viper.GetString(EnvRedisServicePort))
 	}
 
 	managerBase, err := engines.NewDBManagerBase(logger)
