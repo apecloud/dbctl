@@ -25,7 +25,6 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 
 	"github.com/apecloud/dbctl/constant"
 	"github.com/apecloud/dbctl/dcs"
@@ -53,8 +52,8 @@ func NewDBManagerBase(logger logr.Logger) (*DBManagerBase, error) {
 	mgr := DBManagerBase{
 		CurrentMemberName: currentMemberName,
 		CurrentMemberIP:   constant.GetPodIP(),
-		ClusterCompName:   viper.GetString(constant.KBEnvClusterCompName),
-		Namespace:         viper.GetString(constant.KBEnvNamespace),
+		ClusterCompName:   constant.GetClusterCompName(),
+		Namespace:         constant.GetNamespace(),
 		Logger:            logger,
 	}
 	return &mgr, nil

@@ -100,8 +100,8 @@ func NewConfig(properties map[string]string) (*Config, error) {
 		config.Password = viper.GetString(RootPasswordEnv)
 	}
 
-	if viper.IsSet(constant.KBEnvClusterCompName) {
-		config.ReplSetName = viper.GetString(constant.KBEnvClusterCompName)
+	if clusterCompName := constant.GetClusterCompName(); clusterCompName != "" {
+		config.ReplSetName = clusterCompName
 	}
 
 	config.DatabaseName = adminDatabase

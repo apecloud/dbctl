@@ -77,12 +77,12 @@ func NewKubernetesStore() (*KubernetesStore, error) {
 
 	clusterName := constant.GetClusterName()
 	if clusterName == "" {
-		return nil, errors.New(fmt.Sprintf("%s must be set", constant.KBEnvClusterName))
+		return nil, errors.New(fmt.Sprintf("%s or %s must be set", constant.EnvClusterName, constant.KBEnvClusterName))
 	}
 
 	componentName := constant.GetComponentName()
 	if componentName == "" {
-		return nil, errors.New(fmt.Sprintf("%s must be set", constant.KBEnvCompName))
+		return nil, errors.New(fmt.Sprintf("%s or %s must be set", constant.EnvComponentName, constant.KBEnvCompName))
 	}
 
 	clusterCompName := constant.GetClusterCompName()
@@ -92,12 +92,12 @@ func NewKubernetesStore() (*KubernetesStore, error) {
 
 	currentMemberName := constant.GetPodName()
 	if currentMemberName == "" {
-		return nil, errors.Wrap(err, "get hostname failed")
+		return nil, errors.New("get hostname failed")
 	}
 
 	namespace := constant.GetNamespace()
 	if namespace == "" {
-		return nil, errors.New("KB_NAMESPACE must be set")
+		return nil, errors.New(fmt.Sprintf("%s or %s must be set", constant.EnvNamespace, constant.KBEnvNamespace))
 	}
 
 	isLeaderClusterWide := false

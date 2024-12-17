@@ -24,7 +24,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/spf13/viper"
@@ -78,7 +77,7 @@ func CreateEvent(reason string, data map[string]any) (*corev1.Event, error) {
 	podName := constant.GetPodName()
 	podUID := constant.GetPodUID()
 	nodeName := viper.GetString(constant.KBEnvNodeName)
-	namespace := viper.GetString(constant.KBEnvNamespace)
+	namespace := constant.GetNamespace()
 	msg, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
@@ -126,7 +125,7 @@ func SendEvent(ctx context.Context, event *corev1.Event) error {
 		logger.Info("k8s client create failed", "error", err.Error())
 		return err
 	}
-	namespace := os.Getenv(constant.KBEnvNamespace)
+	namespace := constant.GetNamespace()
 	for i := 0; i < 30; i++ {
 		_, err = clientset.CoreV1().Events(namespace).Create(ctx1, event, metav1.CreateOptions{})
 		if err == nil {
