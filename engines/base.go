@@ -21,12 +21,10 @@ package engines
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 
 	"github.com/apecloud/dbctl/constant"
 	"github.com/apecloud/dbctl/dcs"
@@ -46,20 +44,16 @@ type DBManagerBase struct {
 }
 
 func NewDBManagerBase(logger logr.Logger) (*DBManagerBase, error) {
-	currentMemberName := viper.GetString(constant.KBEnvPodName)
+	currentMemberName := constant.GetPodName()
 	if currentMemberName == "" {
-		var err error
-		currentMemberName, err = os.Hostname()
-		if err != nil {
-			return nil, errors.Wrap(err, "get hostname failed")
-		}
+		return nil, errors.New("pod name is not set")
 	}
 
 	mgr := DBManagerBase{
 		CurrentMemberName: currentMemberName,
-		CurrentMemberIP:   viper.GetString(constant.KBEnvPodIP),
-		ClusterCompName:   viper.GetString(constant.KBEnvClusterCompName),
-		Namespace:         viper.GetString(constant.KBEnvNamespace),
+		CurrentMemberIP:   constant.GetPodIP(),
+		ClusterCompName:   constant.GetClusterCompName(),
+		Namespace:         constant.GetNamespace(),
 		Logger:            logger,
 	}
 	return &mgr, nil

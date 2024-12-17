@@ -9,8 +9,6 @@ require (
 	github.com/IBM/sarama v1.43.2
 	github.com/apecloud/kubeblocks v0.9.0
 	github.com/cenkalti/backoff/v4 v4.2.1
-	github.com/deckarep/golang-set/v2 v2.6.0
-	github.com/dlclark/regexp2 v1.11.0
 	github.com/fasthttp/router v1.4.20
 	github.com/go-logr/logr v1.4.2
 	github.com/go-logr/zapr v1.3.0
