@@ -20,25 +20,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package constant
 
 const (
-	PostgreSQLCharacterType = "postgresql"
-	MySQLCharacterType      = "mysql"
-	RedisCharacterType      = "redis"
-	MongoDBCharacterType    = "mongodb"
-	ETCDCharacterType       = "etcd"
-	PolarDBXCharacterType   = "polardbx"
+	RoleProbeAction = "roleProbe"
 )
-
-// action keys
-const (
-	RoleProbeAction     = "roleProbe"
-	HealthyCheckAction  = "healthyCheck"
-	MemberJoinAction    = "memberJoin"
-	MemberLeaveAction   = "memberLeave"
-	ReadonlyAction      = "readonly"
-	ReadWriteAction     = "readwrite"
-	PostProvisionAction = "postProvision"
-	PreTerminateAction  = "preTerminate"
-)
-
-// action envs
-const ()

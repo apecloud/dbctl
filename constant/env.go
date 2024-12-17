@@ -19,56 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package constant
 
-// Global
-const (
-	KBEnvNamespace = "KB_NAMESPACE"
-)
+import (
+	"os"
 
-// Cluster
-const (
-	KBEnvClusterName                  = "KB_CLUSTER_NAME"
-	KBEnvClusterUID                   = "KB_CLUSTER_UID"
-	KBEnvClusterCompName              = "KB_CLUSTER_COMP_NAME"
-	KBEnvClusterUIDPostfix8Deprecated = "KB_CLUSTER_UID_POSTFIX_8"
-)
-
-// Component
-const (
-	KBEnvCompName           = "KB_COMP_NAME"
-	KBEnvCompReplicas       = "KB_COMP_REPLICAS"
-	KBEnvCompServiceVersion = "KB_COMP_SERVICE_VERSION"
-)
-
-// Pod
-const (
-	KBEnvPodName          = "KB_POD_NAME"
-	KBEnvPodUID           = "KB_POD_UID"
-	KBEnvPodIP            = "KB_POD_IP"
-	KBEnvPodIPs           = "KB_POD_IPS"
-	KBEnvPodFQDN          = "KB_POD_FQDN"
-	KBEnvPodOrdinal       = "KB_POD_ORDINAL"
-	KBEnvPodIPDeprecated  = "KB_PODIP"
-	KBEnvPodIPsDeprecated = "KB_PODIPS"
-)
-
-// Host
-const (
-	KBEnvHostIP           = "KB_HOST_IP"
-	KBEnvNodeName         = "KB_NODENAME"
-	KBEnvHostIPDeprecated = "KB_HOSTIP"
-)
-
-// ServiceAccount
-const (
-	KBEnvServiceAccountName = "KB_SA_NAME"
-)
-
-// TLS
-const (
-	KBEnvTLSCertPath = "KB_TLS_CERT_PATH"
-	KBEnvTLSCertFile = "KB_TLS_CERT_FILE"
-	KBEnvTLSCAFile   = "KB_TLS_CA_FILE"
-	KBEnvTLSKeyFile  = "KB_TLS_KEY_FILE"
+	"github.com/spf13/viper"
 )
 
 // Lorry
@@ -76,21 +30,14 @@ const (
 	KBEnvWorkloadType    = "KB_WORKLOAD_TYPE"
 	KBEnvBuiltinHandler  = "KB_BUILTIN_HANDLER"
 	KBEnvActionCommands  = "KB_ACTION_COMMANDS"
-	KBEnvCronJobs        = "KB_CRON_JOBS"
 	KBEnvEngineType      = "KB_ENGINE_TYPE"
 	KBEnvServiceUser     = "KB_SERVICE_USER"
 	KBEnvServicePassword = "KB_SERVICE_PASSWORD"
-	KBEnvLorryHTTPPort   = "LORRY_HTTP_PORT"
-	KBEnvLorryGRPCPort   = "LORRY_GRPC_PORT"
-	KBEnvLorryLogLevel   = "LORRY_LOG_LEVEL"
 	// KBEnvServiceRoles defines the Roles configured in the cluster definition that are visible to users.
 	KBEnvServiceRoles = "KB_SERVICE_ROLES"
 
 	// KBEnvServicePort defines the port of the DB service
 	KBEnvServicePort = "KB_SERVICE_PORT"
-
-	// KBEnvDataPath defines the data volume path of the DB service.
-	KBEnvDataPath = "KB_DATA_PATH"
 
 	// KBEnvTTL controls the lease expiration time in DCS. If the leader fails to renew its lease within the TTL duration, it will lose the leader role, allowing other replicas to take over.
 	KBEnvTTL = "KB_TTL"
@@ -105,6 +52,107 @@ const (
 	KBEnvRsmRoleUpdateMechanism = "KB_RSM_ROLE_UPDATE_MECHANISM"
 	KBEnvRoleProbeTimeout       = "KB_RSM_ROLE_PROBE_TIMEOUT"
 	KBEnvRoleProbePeriod        = "KB_RSM_ROLE_PROBE_PERIOD"
-
-	KBEnvVolumeProtectionSpec = "KB_VOLUME_PROTECTION_SPEC"
 )
+
+// new envs for KB 1.0
+const (
+	EnvNamespace       = "MY_NAMESPACE"
+	EnvPodName         = "MY_POD_NAME"
+	EnvPodIP           = "MY_POD_IP"
+	EnvPodUID          = "MY_POD_UID"
+	EnvClusterName     = "MY_CLUSTER_NAME"
+	EnvComponentName   = "MY_COMP_NAME"
+	EnvClusterCompName = "MY_CLUSTER_COMP_NAME"
+)
+
+// old envs for KB 0.9
+const (
+	KBEnvNamespace       = "KB_NAMESPACE"
+	KBEnvClusterName     = "KB_CLUSTER_NAME"
+	KBEnvClusterCompName = "KB_CLUSTER_COMP_NAME"
+	KBEnvCompName        = "KB_COMP_NAME"
+	KBEnvPodName         = "KB_POD_NAME"
+	KBEnvPodUID          = "KB_POD_UID"
+	KBEnvPodIP           = "KB_POD_IP"
+	KBEnvPodFQDN         = "KB_POD_FQDN"
+	KBEnvNodeName        = "KB_NODENAME"
+)
+
+func GetPodName() string {
+	switch {
+	case viper.IsSet(KBEnvPodName):
+		return viper.GetString(KBEnvPodName)
+	case viper.IsSet(EnvPodName):
+		return viper.GetString(EnvPodName)
+	default:
+		// this may be not correct in some cases, like in the case of host network, it will return the node hostname instead of pod name.
+		podName, _ := os.Hostname()
+		return podName
+	}
+}
+
+func GetPodIP() string {
+	switch {
+	case viper.IsSet(KBEnvPodIP):
+		return viper.GetString(KBEnvPodIP)
+	case viper.IsSet(EnvPodIP):
+		return viper.GetString(EnvPodIP)
+	default:
+		return ""
+	}
+}
+
+func GetPodUID() string {
+	switch {
+	case viper.IsSet(KBEnvPodUID):
+		return viper.GetString(KBEnvPodUID)
+	case viper.IsSet(EnvPodUID):
+		return viper.GetString(EnvPodUID)
+	default:
+		return ""
+	}
+}
+
+func GetNamespace() string {
+	switch {
+	case viper.IsSet(KBEnvNamespace):
+		return viper.GetString(KBEnvNamespace)
+	case viper.IsSet(EnvNamespace):
+		return viper.GetString(EnvNamespace)
+	default:
+		return ""
+	}
+}
+
+func GetClusterName() string {
+	switch {
+	case viper.IsSet(KBEnvClusterName):
+		return viper.GetString(KBEnvClusterName)
+	case viper.IsSet(EnvClusterName):
+		return viper.GetString(EnvClusterName)
+	default:
+		return ""
+	}
+}
+
+func GetComponentName() string {
+	switch {
+	case viper.IsSet(KBEnvCompName):
+		return viper.GetString(KBEnvCompName)
+	case viper.IsSet(EnvComponentName):
+		return viper.GetString(EnvComponentName)
+	default:
+		return ""
+	}
+}
+
+func GetClusterCompName() string {
+	switch {
+	case viper.IsSet(KBEnvClusterCompName):
+		return viper.GetString(KBEnvClusterCompName)
+	case viper.IsSet(EnvClusterCompName):
+		return viper.GetString(EnvClusterCompName)
+	default:
+		return ""
+	}
+}

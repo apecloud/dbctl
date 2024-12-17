@@ -75,8 +75,8 @@ func SentEventForProbe(ctx context.Context, data map[string]any) error {
 
 func CreateEvent(reason string, data map[string]any) (*corev1.Event, error) {
 	// get pod object
-	podName := viper.GetString(constant.KBEnvPodName)
-	podUID := viper.GetString(constant.KBEnvPodUID)
+	podName := constant.GetPodName()
+	podUID := constant.GetPodUID()
 	nodeName := viper.GetString(constant.KBEnvNodeName)
 	namespace := viper.GetString(constant.KBEnvNamespace)
 	msg, err := json.Marshal(data)

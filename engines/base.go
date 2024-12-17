@@ -21,7 +21,6 @@ package engines
 
 import (
 	"context"
-	"os"
 	"strings"
 
 	"github.com/go-logr/logr"
@@ -46,18 +45,14 @@ type DBManagerBase struct {
 }
 
 func NewDBManagerBase(logger logr.Logger) (*DBManagerBase, error) {
-	currentMemberName := viper.GetString(constant.KBEnvPodName)
+	currentMemberName := constant.GetPodName()
 	if currentMemberName == "" {
-		var err error
-		currentMemberName, err = os.Hostname()
-		if err != nil {
-			return nil, errors.Wrap(err, "get hostname failed")
-		}
+		return nil, errors.New("pod name is not set")
 	}
 
 	mgr := DBManagerBase{
 		CurrentMemberName: currentMemberName,
-		CurrentMemberIP:   viper.GetString(constant.KBEnvPodIP),
+		CurrentMemberIP:   constant.GetPodIP(),
 		ClusterCompName:   viper.GetString(constant.KBEnvClusterCompName),
 		Namespace:         viper.GetString(constant.KBEnvNamespace),
 		Logger:            logger,
