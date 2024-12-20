@@ -40,12 +40,7 @@ func (options *GetRoleOptions) Run() error {
 
 	}
 
-	cluster, err := getRole.DCSStore.GetCluster()
-	if err != nil {
-		return errors.Wrap(err, "get cluster failed")
-	}
-
-	role, err := getRole.DBManager.GetReplicaRole(context.Background(), cluster)
+	role, err := getRole.DBManager.GetReplicaRole(context.Background())
 	if err != nil {
 		return errors.Wrap(err, "executing getrole failed")
 	}

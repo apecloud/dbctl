@@ -24,11 +24,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apecloud/dbctl/dcs"
 	"github.com/apecloud/dbctl/engines/models"
 )
 
-func (mgr *Manager) GetReplicaRole(ctx context.Context, _ *dcs.Cluster) (string, error) {
+func (mgr *Manager) GetReplicaRole(ctx context.Context) (string, error) {
 	// To ensure that the role information obtained through subscription is always delivered.
 	if mgr.role != "" && mgr.roleSubscribeUpdateTime+mgr.roleProbePeriod*2 < time.Now().Unix() {
 		return mgr.role, nil

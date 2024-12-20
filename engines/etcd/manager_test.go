@@ -97,7 +97,7 @@ var _ = Describe("ETCD DBManager", func() {
 				etcd:     etcdServer.client,
 				endpoint: testEndpoint,
 			}
-			role, err := manager.GetReplicaRole(context.Background(), nil)
+			role, err := manager.GetReplicaRole(context.Background())
 			Expect(err).Should(BeNil())
 			Expect(role).Should(Equal("Leader"))
 		})

@@ -22,11 +22,10 @@ package etcd
 import (
 	"context"
 
-	"github.com/apecloud/dbctl/dcs"
 	"github.com/apecloud/dbctl/engines/models"
 )
 
-func (mgr *Manager) GetReplicaRole(ctx context.Context, cluster *dcs.Cluster) (string, error) {
+func (mgr *Manager) GetReplicaRole(ctx context.Context) (string, error) {
 	etcdResp, err := mgr.etcd.Status(ctx, mgr.endpoint)
 	if err != nil {
 		return "", err

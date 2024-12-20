@@ -21,10 +21,8 @@ package mongodb
 
 import (
 	"context"
-
-	"github.com/apecloud/dbctl/dcs"
 )
 
-func (mgr *Manager) GetReplicaRole(ctx context.Context, cluster *dcs.Cluster) (string, error) {
+func (mgr *Manager) GetReplicaRole(ctx context.Context) (string, error) {
 	return mgr.GetMemberState(ctx)
 }

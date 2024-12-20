@@ -22,27 +22,11 @@ package mysql
 import (
 	"context"
 
-	"github.com/pkg/errors"
-
-	"github.com/apecloud/dbctl/dcs"
 	"github.com/apecloud/dbctl/engines/models"
 )
 
-func (mgr *Manager) GetReplicaRole(ctx context.Context, cluster *dcs.Cluster) (string, error) {
-	if cluster == nil {
-		return "", errors.New("cluster not found")
-	}
-
-	if !cluster.IsLocked() {
-		mgr.Logger.Info("cluster has no leader lease")
-		return models.SECONDARY, nil
-	}
-
-	if cluster.Leader.Name != mgr.CurrentMemberName {
-		return models.SECONDARY, nil
-	}
-
-	return models.PRIMARY, nil
+func (mgr *Manager) GetReplicaRole(ctx context.Context) (string, error) {
+	return mgr.GetReplicaRoleFromDB(ctx)
 }
 
 func (mgr *Manager) GetReplicaRoleFromDB(ctx context.Context) (string, error) {

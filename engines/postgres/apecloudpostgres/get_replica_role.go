@@ -21,10 +21,8 @@ package apecloudpostgres
 
 import (
 	"context"
-
-	"github.com/apecloud/dbctl/dcs"
 )
 
-func (mgr *Manager) GetReplicaRole(ctx context.Context, _ *dcs.Cluster) (string, error) {
+func (mgr *Manager) GetReplicaRole(ctx context.Context) (string, error) {
 	return mgr.GetMemberRoleWithHost(ctx, "")
 }
