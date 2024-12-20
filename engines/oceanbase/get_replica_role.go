@@ -28,8 +28,8 @@ import (
 	"github.com/apecloud/dbctl/dcs"
 )
 
-func (mgr *Manager) GetReplicaRole(ctx context.Context, cluster *dcs.Cluster) (string, error) {
-	return mgr.GetReplicaRoleForMember(ctx, cluster, nil)
+func (mgr *Manager) GetReplicaRole(ctx context.Context) (string, error) {
+	return mgr.GetReplicaRoleForMember(ctx, nil, nil)
 }
 
 func (mgr *Manager) GetReplicaRoleForMember(ctx context.Context, cluster *dcs.Cluster, member *dcs.Member) (string, error) {
@@ -54,7 +54,7 @@ func (mgr *Manager) GetReplicaRoleForMember(ctx context.Context, cluster *dcs.Cl
 	sql := fmt.Sprintf("SELECT TENANT_ROLE FROM oceanbase.DBA_OB_TENANTS where TENANT_NAME='%s'", mgr.ReplicaTenant)
 
 	db := mgr.DB
-	if member != nil && member.Name != mgr.CurrentMemberName {
+	if member != nil && member.Name != mgr.CurrentMemberName && cluster != nil {
 		db, err = config.GetMemberRootDBConn(cluster, member)
 		if err != nil {
 			return "", errors.Wrap(err, "new db connection failed")

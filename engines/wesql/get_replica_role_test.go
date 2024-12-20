@@ -36,7 +36,7 @@ func TestGetRole(t *testing.T) {
 		mock.ExpectQuery("select CURRENT_LEADER, ROLE, SERVER_ID from information_schema.wesql_cluster_local").
 			WillReturnError(fmt.Errorf("some error"))
 
-		role, err := manager.GetReplicaRole(ctx, nil)
+		role, err := manager.GetReplicaRole(ctx)
 		assert.Equal(t, "", role)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "some error")
@@ -46,7 +46,7 @@ func TestGetRole(t *testing.T) {
 		mock.ExpectQuery("select CURRENT_LEADER, ROLE, SERVER_ID from information_schema.wesql_cluster_local").
 			WillReturnRows(sqlmock.NewRows([]string{"CURRENT_LEADER", "ROLE"}).AddRow("test-wesql-0", "leader"))
 
-		role, err := manager.GetReplicaRole(ctx, nil)
+		role, err := manager.GetReplicaRole(ctx)
 		assert.Equal(t, "", role)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "sql: expected 2 destination arguments in Scan, not 3")
@@ -56,7 +56,7 @@ func TestGetRole(t *testing.T) {
 		mock.ExpectQuery("select CURRENT_LEADER, ROLE, SERVER_ID from information_schema.wesql_cluster_local").
 			WillReturnRows(sqlmock.NewRows([]string{"CURRENT_LEADER", "ROLE"}))
 
-		role, err := manager.GetReplicaRole(ctx, nil)
+		role, err := manager.GetReplicaRole(ctx)
 		assert.Equal(t, "", role)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "no data returned")
@@ -66,7 +66,7 @@ func TestGetRole(t *testing.T) {
 		mock.ExpectQuery("select CURRENT_LEADER, ROLE, SERVER_ID from information_schema.wesql_cluster_local").
 			WillReturnRows(sqlmock.NewRows([]string{"CURRENT_LEADER", "ROLE", "SERVER_ID"}).AddRow("test-wesql-0", "leader", "1"))
 
-		role, err := manager.GetReplicaRole(ctx, nil)
+		role, err := manager.GetReplicaRole(ctx)
 		assert.Equal(t, "leader", role)
 		assert.Nil(t, err)
 	})

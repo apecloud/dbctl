@@ -25,7 +25,6 @@ import (
 	"github.com/pkg/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/apecloud/dbctl/dcs"
 	"github.com/apecloud/dbctl/engines"
 	"github.com/apecloud/dbctl/engines/register"
 	"github.com/apecloud/dbctl/operations"
@@ -34,7 +33,6 @@ import (
 
 type GetRole struct {
 	operations.Base
-	DCSStore  dcs.DCS
 	DBManager engines.DBManager
 }
 
@@ -48,11 +46,6 @@ func init() {
 }
 
 func (s *GetRole) Init(ctx context.Context) error {
-	s.DCSStore = dcs.GetStore()
-	if s.DCSStore == nil {
-		return errors.New("dcs store init failed")
-	}
-
 	s.Logger = ctrl.Log.WithName("getrole")
 	dbManager, err := register.GetDBManager()
 	if err != nil {
@@ -73,8 +66,7 @@ func (s *GetRole) Do(ctx context.Context, req *operations.OpsRequest) (*operatio
 	}
 	resp.Data["operation"] = util.GetRoleOperation
 
-	cluster := s.DCSStore.GetClusterFromCache()
-	role, err := s.DBManager.GetReplicaRole(ctx, cluster)
+	role, err := s.DBManager.GetReplicaRole(ctx)
 	if err != nil {
 		s.Logger.Info("executing getrole error", "error", err)
 		return resp, err

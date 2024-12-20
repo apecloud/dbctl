@@ -131,11 +131,9 @@ func (s *CheckRole) Do(ctx context.Context, _ *operations.OpsRequest) (*operatio
 		return resp, nil
 	}
 
-	cluster := s.dcsStore.GetClusterFromCache()
-
 	ctx1, cancel := context.WithTimeout(ctx, s.Timeout)
 	defer cancel()
-	role, err = manager.GetReplicaRole(ctx1, cluster)
+	role, err = manager.GetReplicaRole(ctx1)
 
 	if err != nil {
 		s.logger.Info("executing checkRole error", "error", err.Error())

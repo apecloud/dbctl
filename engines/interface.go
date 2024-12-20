@@ -70,7 +70,7 @@ type DBManager interface {
 	IsLeader(context.Context, *dcs.Cluster) (bool, error)
 	IsLeaderMember(context.Context, *dcs.Cluster, *dcs.Member) (bool, error)
 	IsFirstMember() bool
-	GetReplicaRole(context.Context, *dcs.Cluster) (string, error)
+	GetReplicaRole(context.Context) (string, error)
 
 	JoinCurrentMemberToCluster(context.Context, *dcs.Cluster) error
 	LeaveMemberFromCluster(context.Context, *dcs.Cluster, string) error

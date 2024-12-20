@@ -29,11 +29,10 @@ import (
 	context "context"
 	reflect "reflect"
 
-	logr "github.com/go-logr/logr"
-	gomock "github.com/golang/mock/gomock"
-
 	dcs "github.com/apecloud/dbctl/dcs"
 	models "github.com/apecloud/dbctl/engines/models"
+	logr "github.com/go-logr/logr"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockDBManager is a mock of DBManager interface.
@@ -260,18 +259,18 @@ func (mr *MockDBManagerMockRecorder) GetPort() *gomock.Call {
 }
 
 // GetReplicaRole mocks base method.
-func (m *MockDBManager) GetReplicaRole(arg0 context.Context, arg1 *dcs.Cluster) (string, error) {
+func (m *MockDBManager) GetReplicaRole(arg0 context.Context) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetReplicaRole", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetReplicaRole", arg0)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetReplicaRole indicates an expected call of GetReplicaRole.
-func (mr *MockDBManagerMockRecorder) GetReplicaRole(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockDBManagerMockRecorder) GetReplicaRole(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReplicaRole", reflect.TypeOf((*MockDBManager)(nil).GetReplicaRole), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReplicaRole", reflect.TypeOf((*MockDBManager)(nil).GetReplicaRole), arg0)
 }
 
 // GrantUserRole mocks base method.

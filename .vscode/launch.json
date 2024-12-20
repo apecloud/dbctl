@@ -37,7 +37,7 @@
             // "--components-path","./config/probe/components","--config","./config/probe/config.yaml","--dapr-graceful-shutdown-seconds","0","--log-level=debug"]
             // "args": ["--config-path", "./config/dbctl/components",  "service"]
             //"args": ["--config-path", "./config/dbctl/components", "--zap-log-level=debug", "-v=1", "leavemember"]
-            "args": ["--config-path", "./config/dbctl/components", "--zap-log-level=debug", "-v=1", "mysql", "joinmember"]
+            "args": ["--config-path", "./config/dbctl/components", "--zap-log-level=debug", "-v=1", "mysql", "getrole"]
             //"args": ["--config-path", "./config/dbctl/components", "--zap-log-level=debug", "-v=1", "switchover", "--primary", "mongo2-mongodb-2"]
         },
 

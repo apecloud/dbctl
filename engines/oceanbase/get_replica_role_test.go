@@ -72,7 +72,7 @@ func TestGetRole(t *testing.T) {
 		mock.ExpectQuery("SELECT TENANT_ROLE FROM oceanbase.DBA_OB_TENANTS where TENANT_NAME='alice'").
 			WillReturnError(fmt.Errorf("some error"))
 
-		role, err := manager.GetReplicaRole(ctx, nil)
+		role, err := manager.GetReplicaRole(ctx)
 		assert.Equal(t, "", role)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "some error")
@@ -84,7 +84,7 @@ func TestGetRole(t *testing.T) {
 		mock.ExpectQuery("SELECT TENANT_ROLE FROM oceanbase.DBA_OB_TENANTS where TENANT_NAME='alice'").
 			WillReturnRows(sqlmock.NewRows([]string{"TENANT_ROLE"}).AddRow(PRIMARY))
 
-		role, err := manager.GetReplicaRole(ctx, nil)
+		role, err := manager.GetReplicaRole(ctx)
 		assert.Equal(t, PRIMARY, role)
 		assert.Nil(t, err)
 	})
@@ -95,7 +95,7 @@ func TestGetRole(t *testing.T) {
 		mock.ExpectQuery("SELECT TENANT_ROLE FROM oceanbase.DBA_OB_TENANTS where TENANT_NAME='alice'").
 			WillReturnRows(sqlmock.NewRows([]string{"ROLE"}))
 
-		role, err := manager.GetReplicaRole(ctx, nil)
+		role, err := manager.GetReplicaRole(ctx)
 		assert.Equal(t, "", role)
 		assert.Nil(t, err)
 	})

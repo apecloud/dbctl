@@ -25,11 +25,10 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/apecloud/dbctl/dcs"
 	"github.com/apecloud/dbctl/engines/mysql"
 )
 
-func (mgr *Manager) GetReplicaRole(ctx context.Context, _ *dcs.Cluster) (string, error) {
+func (mgr *Manager) GetReplicaRole(ctx context.Context) (string, error) {
 	sql := "select CURRENT_LEADER, ROLE, SERVER_ID  from information_schema.wesql_cluster_local"
 
 	rows, err := mgr.DB.QueryContext(ctx, sql)
