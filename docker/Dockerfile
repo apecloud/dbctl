@@ -11,7 +11,7 @@
 #TARGETARCH - Architecture from --platform, e.g. arm64
 #TARGETVARIANT - used to set target ARM variant, e.g. v7
 
-ARG GO_VERSION=1.22-alpine                                                      
+ARG GO_VERSION=1.23.10-alpine
                                                                                 
 FROM --platform=${BUILDPLATFORM} golang:${GO_VERSION} as builder
 
@@ -38,7 +38,7 @@ RUN --mount=type=bind,target=. \
     CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags="${LD_FLAGS}" -a -o /out/dbctl cmd/dbctl/main.go
 
 # Use alpine with tag 20230329 is corresponding to "edge" tag (latest release to date is 3.18) as of 20230625
-FROM docker.io/alpine:edge as dist
+FROM docker.io/alpine:3.22 as dist
 ARG APK_MIRROR
 
 # copy files
