@@ -108,8 +108,29 @@ func NewManager(properties engines.Properties) (engines.DBManager, error) {
 				break
 			}
 		}
-	case viper.GetString("REDIS_HOST_NETWORK_PORT") != "" || viper.GetString("REDIS_ADVERTISED_PORT") != "":
+	case viper.IsSet("REDIS_HOST_NETWORK_PORT") || viper.IsSet("REDIS_ADVERTISED_PORT") ||
+		viper.IsSet("REDIS_CLUSTER_HOST_NETWORK_PORT") || viper.IsSet("CURRENT_SHARD_ADVERTISED_PORT"):
 		mgr.currentRedisHost = viper.GetString("KB_HOST_IP")
+	}
+
+	setCurrentRedisPort := func(advertisedPortEnv string) error {
+		if !viper.IsSet(advertisedPortEnv) {
+			return nil
+		}
+		port, err := mgr.getAdvertisedPort(viper.GetString(advertisedPortEnv))
+		if err != nil {
+			return err
+		}
+		mgr.currentRedisPort = port
+		return nil
+	}
+
+	if err = setCurrentRedisPort("REDIS_ADVERTISED_PORT"); err != nil {
+		return nil, err
+	}
+
+	if err = setCurrentRedisPort("CURRENT_SHARD_ADVERTISED_PORT"); err != nil {
+		return nil, err
 	}
 
 	if viper.GetString("REDIS_ADVERTISED_PORT") != "" {
