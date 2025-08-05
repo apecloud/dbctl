@@ -22,25 +22,18 @@ package redis
 import (
 	"context"
 	"strings"
-	"time"
 
 	"github.com/apecloud/dbctl/engines/models"
 )
 
 func (mgr *Manager) GetReplicaRole(ctx context.Context) (string, error) {
-	// To ensure that the role information obtained through subscription is always delivered.
-	if mgr.role != "" && mgr.roleSubscribeUpdateTime+mgr.roleProbePeriod*2 < time.Now().Unix() {
-		return mgr.role, nil
-	}
 
-	// We use the role obtained from Sentinel as the sole source of truth.
-	masterAddr, err := mgr.sentinelClient.GetMasterAddrByName(ctx, mgr.ClusterCompName).Result()
-	if err != nil {
-		// when we can't get role from sentinel, we query redis instead
+	// when we can't get role from sentinel, we query redis instead
+	getRoleFromRedisClient := func() (string, error) {
 		var role string
 		result, err := mgr.client.Info(ctx, "Replication").Result()
 		if err != nil {
-			mgr.Logger.Error(err, "Role query error")
+			mgr.Logger.Info("Role query failed", "error", err.Error())
 			return role, err
 		} else {
 			// split the result into lines
@@ -60,31 +53,26 @@ func (mgr *Manager) GetReplicaRole(ctx context.Context) (string, error) {
 		}
 	}
 
-	masterName := strings.Split(masterAddr[0], ".")[0]
-	// if current member is not master from sentinel, just return secondary to avoid double master
-	if masterName != mgr.CurrentMemberName {
-		return models.SECONDARY, nil
+	if mgr.sentinelClient == nil {
+		return getRoleFromRedisClient()
 	}
-	return models.PRIMARY, nil
+	// We use the role obtained from Sentinel as the sole source of truth.
+	masterAddr, err := mgr.sentinelClient.GetMasterAddrByName(ctx, mgr.masterName).Result()
+	if err != nil {
+		mgr.Logger.Info("failed to get master address from Sentinel, try to get from Redis", "error", err.Error())
+		return getRoleFromRedisClient()
+	}
+	masterIP := masterAddr[0]
+	masterPort := masterAddr[1]
+	return mgr.checkPrimary(masterIP, masterPort), nil
 }
 
-func (mgr *Manager) SubscribeRoleChange(ctx context.Context) {
-	pubSub := mgr.sentinelClient.Subscribe(ctx, "+switch-master")
-
-	// go-redis periodically sends ping messages to test connection health
-	// and re-subscribes if ping can not receive for 30 seconds.
-	// so we don't need to retry
-	ch := pubSub.Channel()
-	for msg := range ch {
-		// +switch-master <master name> <old ip> <old port> <new ip> <new port>
-		masterAddr := strings.Split(msg.Payload, " ")
-		masterName := strings.Split(masterAddr[3], ".")[0]
-
-		if masterName == mgr.CurrentMemberName {
-			mgr.role = models.PRIMARY
-		} else {
-			mgr.role = models.SECONDARY
-		}
-		mgr.roleSubscribeUpdateTime = time.Now().Unix()
+// If current member is not master from sentinel, just return secondary to avoid double master
+// When currentRedisHost is a domain name, it does not include dnsDomain by default,
+// and prefix matching can override the matching of domain names or IPs.
+func (mgr *Manager) checkPrimary(masterIP, masterPort string) string {
+	if !strings.HasPrefix(masterIP, mgr.currentRedisHost) || masterPort != mgr.currentRedisPort {
+		return models.SECONDARY
 	}
+	return models.PRIMARY
 }

@@ -143,18 +143,38 @@ func newClient(s *Settings) redis.UniversalClient {
 	return redis.NewClient(options)
 }
 
-func newSentinelClient(s *Settings, clusterCompName string) *redis.SentinelClient {
+func newSentinelClient(s *Settings, clusterCompName string, majorVersion int) *redis.SentinelClient {
+	if !viper.IsSet("SENTINEL_COMPONENT_NAME") {
+		// cluster has no sentinel
+		return nil
+	}
+
 	sentinelHost := fmt.Sprintf("%s-sentinel-headless", clusterCompName)
+	if viper.IsSet("SENTINEL_HEADLESS_SERVICE_NAME") {
+		sentinelHost = viper.GetString("SENTINEL_HEADLESS_SERVICE_NAME")
+	}
 	sentinelPort := "26379"
-	if viper.IsSet(EnvRedisSentinelServicePort) {
-		sentinelPort = viper.GetString(EnvRedisSentinelServicePort)
+	if viper.IsSet("SENTINEL_SERVICE_PORT") {
+		sentinelPort = viper.GetString("SENTINEL_SERVICE_PORT")
+	}
+
+	sentinelUser := s.Username
+	if viper.IsSet("SENTINEL_USER") {
+		sentinelUser = viper.GetString("SENTINEL_USER")
+	}
+	sentinelPassword := s.Password
+	if viper.IsSet("SENTINEL_PASSWORD") {
+		sentinelPassword = viper.GetString("SENTINEL_PASSWORD")
+	}
+	if majorVersion < 6 {
+		sentinelUser = ""
 	}
 
 	opt := &redis.Options{
 		DB:              s.DB,
 		Addr:            fmt.Sprintf("%s:%s", sentinelHost, sentinelPort),
-		Password:        s.Password,
-		Username:        s.Username,
+		Password:        sentinelPassword,
+		Username:        sentinelUser,
 		MaxRetries:      s.RedisMaxRetries,
 		MaxRetryBackoff: time.Duration(s.RedisMaxRetryInterval),
 		MinRetryBackoff: time.Duration(s.RedisMinRetryInterval),
