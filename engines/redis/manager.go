@@ -22,6 +22,9 @@ package redis
 import (
 	"context"
 	"fmt"
+	"net"
+	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -31,14 +34,6 @@ import (
 
 	"github.com/apecloud/dbctl/constant"
 	"github.com/apecloud/dbctl/engines"
-)
-
-const (
-	EnvRootUser   = "REDIS_DEFAULT_USER"
-	EnvRootPasswd = "REDIS_DEFAULT_PASSWORD"
-
-	EnvRedisServicePort         = "DBCTL_REDIS_SERVICE_PORT"
-	EnvRedisSentinelServicePort = "DBCTL_REDIS_SENTINEL_SERVICE_PORT"
 )
 
 var (
@@ -58,6 +53,9 @@ type Manager struct {
 	role                    string
 	roleSubscribeUpdateTime int64
 	roleProbePeriod         int64
+	masterName              string
+	currentRedisHost        string
+	currentRedisPort        string
 }
 
 var _ engines.DBManager = &Manager{}
@@ -65,20 +63,16 @@ var _ engines.DBManager = &Manager{}
 func NewManager(properties engines.Properties) (engines.DBManager, error) {
 	logger := ctrl.Log.WithName("Redis")
 
-	if viper.IsSet(constant.KBEnvServiceUser) {
-		redisUser = viper.GetString(constant.KBEnvServiceUser)
-	} else if viper.IsSet(EnvRootUser) {
-		redisUser = viper.GetString(EnvRootUser)
+	if viper.IsSet("REDIS_DEFAULT_USER") {
+		redisUser = viper.GetString("REDIS_DEFAULT_USER")
 	}
 
-	if viper.IsSet(constant.KBEnvServicePassword) {
-		redisPasswd = viper.GetString(constant.KBEnvServicePassword)
-	} else if viper.IsSet(EnvRootPasswd) {
-		redisPasswd = viper.GetString(EnvRootPasswd)
+	if viper.IsSet("REDIS_DEFAULT_PASSWORD") {
+		redisPasswd = viper.GetString("REDIS_DEFAULT_PASSWORD")
 	}
 
-	if viper.IsSet(EnvRedisServicePort) {
-		properties["redisHost"] = fmt.Sprintf("127.0.0.1:%s", viper.GetString(EnvRedisServicePort))
+	if viper.IsSet(constant.KBEnvServicePort) {
+		properties["redisHost"] = fmt.Sprintf("127.0.0.1:%s", viper.GetString(constant.KBEnvServicePort))
 	}
 
 	managerBase, err := engines.NewDBManagerBase(logger)
@@ -90,7 +84,50 @@ func NewManager(properties engines.Properties) (engines.DBManager, error) {
 		roleProbePeriod: int64(viper.GetInt(constant.KBEnvRoleProbePeriod)),
 	}
 
-	mgr.startAt = time.Now()
+	mgr.masterName = mgr.ClusterCompName
+	if viper.IsSet("CUSTOM_SENTINEL_MASTER_NAME") {
+		mgr.masterName = viper.GetString("CUSTOM_SENTINEL_MASTER_NAME")
+	}
+	mgr.currentRedisHost = viper.GetString("KB_POD_FQDN")
+	mgr.currentRedisPort = viper.GetString("SERVICE_PORT")
+
+	switch {
+	case viper.IsSet("FIXED_POD_IP_ENABLED"):
+		fixPodIP, err := getFixedPodIP(viper.GetString("KB_POD_FQDN"))
+		if err != nil {
+			return nil, err
+		}
+		mgr.currentRedisHost = fixPodIP
+	case viper.IsSet("LOAD_BALANCER_ENABLED"):
+		lbHostInfo := viper.GetString("REDIS_LB_ADVERTISED_HOST")
+		svcHosts := strings.Split(lbHostInfo, ",")
+		for _, v := range svcHosts {
+			items := strings.Split(v, ":")
+			if getIndex(items[0]) == getIndex(mgr.CurrentMemberName) {
+				mgr.currentRedisHost = items[1]
+				break
+			}
+		}
+	case viper.GetString("REDIS_HOST_NETWORK_PORT") != "" || viper.GetString("REDIS_ADVERTISED_PORT") != "":
+		mgr.currentRedisHost = viper.GetString("KB_HOST_IP")
+	}
+
+	if viper.GetString("REDIS_ADVERTISED_PORT") != "" {
+		port, err := mgr.getAdvertisedPort(viper.GetString("REDIS_ADVERTISED_PORT"))
+		if err != nil {
+			return nil, err
+		}
+		mgr.currentRedisPort = port
+	}
+
+	majorVersion, err := getRedisMajorVersion()
+	if err != nil {
+		return nil, err
+	}
+	// The username is supported after 6.0
+	if majorVersion < 6 {
+		redisUser = ""
+	}
 
 	defaultSettings := &Settings{
 		Password: redisPasswd,
@@ -101,11 +138,7 @@ func NewManager(properties engines.Properties) (engines.DBManager, error) {
 		return nil, err
 	}
 
-	mgr.sentinelClient = newSentinelClient(mgr.clientSettings, mgr.ClusterCompName)
-
-	mgr.ctx, mgr.cancel = context.WithCancel(context.Background())
-
-	go mgr.SubscribeRoleChange(mgr.ctx)
+	mgr.sentinelClient = newSentinelClient(mgr.clientSettings, mgr.ClusterCompName, majorVersion)
 	return mgr, nil
 }
 
@@ -133,4 +166,63 @@ func tokenizeCmd2Args(cmd string) []interface{} {
 		redisArgs = append(redisArgs, arg)
 	}
 	return redisArgs
+}
+
+func getFixedPodIP(podFQDN string) (string, error) {
+	addrs, err := net.LookupHost(podFQDN)
+	if err != nil {
+		return "", err
+	}
+	if len(addrs) > 0 {
+		return addrs[0], nil
+	}
+
+	return "", fmt.Errorf("failed to get IP address for %s", podFQDN)
+}
+
+func getIndex(name string) string {
+	items := strings.Split(name, "-")
+	return items[len(items)-1]
+}
+
+func (mgr *Manager) getAdvertisedPort(redisAdvertisedPort string) (string, error) {
+	// redisAdvertisedPort: pod1Svc:advertisedPort1,pod2Svc:advertisedPort2,...
+	addrList := strings.Split(redisAdvertisedPort, ",")
+	for _, addr := range addrList {
+		host := strings.Split(addr, ":")[0]
+		port := strings.Split(addr, ":")[1]
+		if getIndex(host) == getIndex(mgr.CurrentMemberName) {
+			return port, nil
+		}
+	}
+
+	return "", fmt.Errorf("failed to get advertised port for %s", mgr.CurrentMemberName)
+}
+
+// we get redis version from 'redis-cli --version'
+func getRedisMajorVersion() (int, error) {
+	redisCliCMD, err := exec.LookPath("redis-cli")
+	if err != nil {
+		if viper.IsSet("REDIS_VERSION") {
+			return strconv.Atoi(strings.Split(strings.TrimSpace(viper.GetString("REDIS_VERSION")), ".")[0])
+		}
+		return -1, err
+	}
+
+	out, err := exec.Command(redisCliCMD, "--version").Output()
+	if err != nil {
+		return -1, err
+	}
+
+	// output eg: redis-cli 7.2.4
+	versionInfo := strings.Split(strings.TrimSpace(string(out)), " ")
+	if len(versionInfo) < 2 {
+		return -1, fmt.Errorf("invalid redis version info: %s", string(out))
+	}
+
+	majorVersion, err := strconv.Atoi(strings.Split(strings.TrimSpace(versionInfo[1]), ".")[0])
+	if err != nil {
+		return -1, err
+	}
+	return majorVersion, nil
 }
