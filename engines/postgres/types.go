@@ -67,3 +67,7 @@ type ConsensusMemberHealthStatus struct {
 	Connected   bool
 	LogDelayNum int64
 }
+
+type PatroniResp struct {
+	Role string `json:"role"`
+}

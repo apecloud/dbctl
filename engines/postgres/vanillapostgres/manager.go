@@ -21,11 +21,15 @@ package vanillapostgres
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
+	"github.com/spf13/viper"
 
 	"github.com/apecloud/dbctl/dcs"
 	"github.com/apecloud/dbctl/engines"
@@ -89,6 +93,40 @@ func (mgr *Manager) IsDBStartupReady() bool {
 }
 
 func (mgr *Manager) GetMemberRoleWithHost(ctx context.Context, host string) (string, error) {
+	getRoleFromPatroni := func() (string, error) {
+		patroniPort := "8008"
+		if viper.IsSet("PATRONI_PORT") {
+			patroniPort = viper.GetString("PATRONI_PORT")
+		}
+
+		resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%s", patroniPort))
+		if err != nil {
+			return "", err
+		}
+		defer func() {
+			_ = resp.Body.Close()
+		}()
+
+		var data postgres.PatroniResp
+		if err = json.NewDecoder(resp.Body).Decode(&data); err != nil {
+			return "", err
+		}
+
+		role := strings.ToLower(data.Role)
+		switch role {
+		case "master", "standby_leader", "primary":
+			return models.PRIMARY, nil
+		case "replica":
+			return models.SECONDARY, nil
+		default:
+			return "", errors.Errorf("unknown role:%s", role)
+		}
+	}
+
+	if viper.IsSet("PATRONIVERSION") {
+		return getRoleFromPatroni()
+	}
+
 	sql := "select pg_is_in_recovery();"
 
 	resp, err := mgr.QueryWithHost(ctx, sql, host)
