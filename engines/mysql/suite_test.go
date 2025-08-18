@@ -45,5 +45,5 @@ func TestMysqlDBManager(t *testing.T) {
 	RunSpecs(t, "MySQL DBManager. Suite")
 }
 
-var _ = BeforeSuite(func() {
+var _ = AfterSuite(func() {
 })

@@ -19,24 +19,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package models
 
-import "fmt"
+import (
+	"errors"
+)
 
 const (
-	errMsgNoSQL           = "no sql provided"
 	errMsgNoUserName      = "no username provided"
 	errMsgNoPassword      = "no password provided"
 	errMsgNoRoleName      = "no rolename provided"
 	errMsgInvalidRoleName = "invalid rolename, should be one of [superuser, readwrite, readonly]"
-	errMsgNoSuchUser      = "no such user"
 	errMsgNotImplemented  = "not implemented"
 )
 
 var (
-	ErrNoSQL           = fmt.Errorf(errMsgNoSQL)
-	ErrNoUserName      = fmt.Errorf(errMsgNoUserName)
-	ErrNoPassword      = fmt.Errorf(errMsgNoPassword)
-	ErrNoRoleName      = fmt.Errorf(errMsgNoRoleName)
-	ErrInvalidRoleName = fmt.Errorf(errMsgInvalidRoleName)
-	ErrNoSuchUser      = fmt.Errorf(errMsgNoSuchUser)
-	ErrNotImplemented  = fmt.Errorf(errMsgNotImplemented)
+	ErrNoUserName      = errors.New(errMsgNoUserName)
+	ErrNoPassword      = errors.New(errMsgNoPassword)
+	ErrNoRoleName      = errors.New(errMsgNoRoleName)
+	ErrInvalidRoleName = errors.New(errMsgInvalidRoleName)
+	ErrNotImplemented  = errors.New(errMsgNotImplemented)
 )

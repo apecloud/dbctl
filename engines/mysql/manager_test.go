@@ -21,13 +21,11 @@ package mysql
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"testing"
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/go-sql-driver/mysql"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 
@@ -38,48 +36,36 @@ const (
 	fakePodName         = "fake-mysql-0"
 	fakeClusterCompName = "test-mysql"
 	fakeNamespace       = "fake-namespace"
-	fakeDBPort          = "fake-port"
 )
 
 func TestNewManager(t *testing.T) {
 	defer viper.Reset()
 
-	t.Run("new config failed", func(t *testing.T) {
-		manager, err := NewManager(fakePropertiesWithPem)
+	viper.SetDefault(constant.KBEnvPodName, "pod-test-0")
+	viper.SetDefault(constant.KBEnvClusterCompName, "cluster-component-test")
+	viper.SetDefault(constant.KBEnvNamespace, "namespace-test")
+	t.Run("new default manager", func(t *testing.T) {
+		managerIFace, err := NewManager()
+		assert.NotNil(t, managerIFace)
+		assert.Nil(t, err)
 
-		assert.Nil(t, manager)
-		assert.NotNil(t, err)
+		manager, ok := managerIFace.(*Manager)
+		assert.True(t, ok)
+		assert.Equal(t, "pod-test-0", manager.CurrentMemberName)
+		assert.Equal(t, "namespace-test", manager.Namespace)
+		assert.Equal(t, "cluster-component-test", manager.ClusterCompName)
+		assert.Equal(t, uint(1), manager.serverID)
 	})
 
 	viper.Set(constant.KBEnvPodName, "fake")
 	viper.Set(constant.KBEnvClusterCompName, fakeClusterCompName)
 	viper.Set(constant.KBEnvNamespace, fakeNamespace)
 	t.Run("get server id failed", func(t *testing.T) {
-		manager, err := NewManager(fakeProperties)
+		manager, err := NewManager()
 
 		assert.Nil(t, manager)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "the format of member name is wrong")
-	})
-
-	viper.Set(constant.KBEnvPodName, fakePodName)
-	t.Run("get local connection failed", func(t *testing.T) {
-		manager, err := NewManager(fakePropertiesWithWrongURL)
-
-		assert.Nil(t, manager)
-		assert.NotNil(t, err)
-	})
-
-	t.Run("new manager successfully", func(t *testing.T) {
-		managerIFace, err := NewManager(fakeProperties)
-		assert.Nil(t, err)
-
-		manager, ok := managerIFace.(*Manager)
-		assert.True(t, ok)
-		assert.Equal(t, fakePodName, manager.CurrentMemberName)
-		assert.Equal(t, fakeNamespace, manager.Namespace)
-		assert.Equal(t, fakeClusterCompName, manager.ClusterCompName)
-		assert.Equal(t, uint(1), manager.serverID)
 	})
 }
 
@@ -113,210 +99,6 @@ func TestManager_IsDBStartupReady(t *testing.T) {
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("there were unfulfilled expectations: %v", err)
 	}
-}
-
-func TestManager_WriteCheck(t *testing.T) {
-	ctx := context.TODO()
-	manager, mock, _ := mockDatabase(t)
-
-	t.Run("write check failed", func(t *testing.T) {
-		mock.ExpectExec("CREATE DATABASE IF NOT EXISTS kubeblocks;").
-			WillReturnError(fmt.Errorf("some error"))
-
-		canWrite := manager.WriteCheck(ctx, manager.DB)
-		assert.NotNil(t, canWrite)
-	})
-
-	t.Run("write check successfully", func(t *testing.T) {
-		mock.ExpectExec("CREATE DATABASE IF NOT EXISTS kubeblocks;").
-			WillReturnResult(sqlmock.NewResult(1, 1))
-
-		canWrite := manager.WriteCheck(ctx, manager.DB)
-		assert.Nil(t, canWrite)
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
-}
-
-func TestManager_ReadCheck(t *testing.T) {
-	ctx := context.TODO()
-	manager, mock, _ := mockDatabase(t)
-
-	t.Run("no rows in result set", func(t *testing.T) {
-		mock.ExpectQuery("select").
-			WillReturnError(sql.ErrNoRows)
-
-		canRead := manager.ReadCheck(ctx, manager.DB)
-		assert.Nil(t, canRead)
-	})
-
-	t.Run("no healthy database", func(t *testing.T) {
-		mock.ExpectQuery("select").
-			WillReturnError(&mysql.MySQLError{Number: 1049})
-
-		canRead := manager.ReadCheck(ctx, manager.DB)
-		assert.Nil(t, canRead)
-	})
-
-	t.Run("Read check failed", func(t *testing.T) {
-		mock.ExpectQuery("select").
-			WillReturnError(fmt.Errorf("some error"))
-
-		canRead := manager.ReadCheck(ctx, manager.DB)
-		assert.NotNil(t, canRead)
-	})
-
-	t.Run("Read check successfully", func(t *testing.T) {
-		mock.ExpectQuery("select").
-			WillReturnRows(sqlmock.NewRows([]string{"check_ts"}).AddRow(1))
-
-		canRead := manager.ReadCheck(ctx, manager.DB)
-		assert.Nil(t, canRead)
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
-}
-
-func TestManager_GetGlobalState(t *testing.T) {
-	ctx := context.TODO()
-	manager, mock, _ := mockDatabase(t)
-
-	t.Run("get global state successfully", func(t *testing.T) {
-		mock.ExpectQuery("select").
-			WillReturnRows(sqlmock.NewRows([]string{"@@global.hostname", "@@global.server_uuid", "@@global.gtid_executed", "@@global.gtid_purged", "@@global.read_only", "@@global.super_read_only"}).
-				AddRow(fakePodName, fakeServerUUID, fakeGTIDString, fakeGTIDSet, 1, 1))
-
-		globalState, err := manager.GetGlobalState(ctx, manager.DB)
-		assert.Nil(t, err)
-		assert.NotNil(t, globalState)
-		assert.Equal(t, fakePodName, globalState["hostname"])
-		assert.Equal(t, fakeServerUUID, globalState["server_uuid"])
-		assert.Equal(t, fakeGTIDString, globalState["gtid_executed"])
-		assert.Equal(t, fakeGTIDSet, globalState["gtid_purged"])
-		assert.Equal(t, "1", globalState["read_only"])
-		assert.Equal(t, "1", globalState["super_read_only"])
-	})
-
-	t.Run("get global state failed", func(t *testing.T) {
-		mock.ExpectQuery("select").
-			WillReturnError(fmt.Errorf("some error"))
-
-		globalState, err := manager.GetGlobalState(ctx, manager.DB)
-		assert.Nil(t, globalState)
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "some error")
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
-}
-
-func TestManager_GetSlaveStatus(t *testing.T) {
-	ctx := context.TODO()
-	manager, mock, _ := mockDatabase(t)
-
-	t.Run("query rows map failed", func(t *testing.T) {
-		mock.ExpectQuery("show slave status").
-			WillReturnError(fmt.Errorf("some error"))
-
-		slaveStatus, err := manager.GetSlaveStatus(ctx, manager.DB)
-		assert.Nil(t, slaveStatus)
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "some error")
-	})
-
-	t.Run("get slave status successfully", func(t *testing.T) {
-		mock.ExpectQuery("show slave status").
-			WillReturnRows(sqlmock.NewRows([]string{"Seconds_Behind_Master", "Slave_IO_Running"}).AddRow("249904", "Yes"))
-
-		slaveStatus, err := manager.GetSlaveStatus(ctx, manager.DB)
-		assert.Nil(t, err)
-		assert.Equal(t, "249904", slaveStatus.GetString("Seconds_Behind_Master"))
-		assert.Equal(t, "Yes", slaveStatus.GetString("Slave_IO_Running"))
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
-}
-
-func TestManager_GetMasterStatus(t *testing.T) {
-	ctx := context.TODO()
-	manager, mock, _ := mockDatabase(t)
-
-	t.Run("query rows map failed", func(t *testing.T) {
-		mock.ExpectQuery("show master status").
-			WillReturnError(fmt.Errorf("some error"))
-
-		slaveStatus, err := manager.GetMasterStatus(ctx, manager.DB)
-		assert.Nil(t, slaveStatus)
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "some error")
-	})
-
-	t.Run("get slave status successfully", func(t *testing.T) {
-		mock.ExpectQuery("show master status").
-			WillReturnRows(sqlmock.NewRows([]string{"File", "Executed_Gtid_Set"}).AddRow("master-bin.000002", fakeGTIDSet))
-
-		slaveStatus, err := manager.GetMasterStatus(ctx, manager.DB)
-		assert.Nil(t, err)
-		assert.Equal(t, "master-bin.000002", slaveStatus.GetString("File"))
-		assert.Equal(t, fakeGTIDSet, slaveStatus.GetString("Executed_Gtid_Set"))
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
-}
-
-func TestManager_Demote(t *testing.T) {
-	ctx := context.TODO()
-	manager, mock, _ := mockDatabase(t)
-
-	t.Run("execute promote failed", func(t *testing.T) {
-		mock.ExpectExec("set global read_only=on").
-			WillReturnError(fmt.Errorf("some error"))
-
-		err := manager.Demote(ctx)
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "some error")
-	})
-
-	t.Run("execute promote successfully", func(t *testing.T) {
-		mock.ExpectExec("set global read_only=on").
-			WillReturnResult(sqlmock.NewResult(1, 1))
-
-		err := manager.Demote(ctx)
-		assert.Nil(t, err)
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
-}
-
-func TestManager_isRecoveryConfOutdated(t *testing.T) {
-	manager, _, _ := mockDatabase(t)
-	manager.slaveStatus = RowMap{}
-
-	t.Run("slaveStatus empty", func(t *testing.T) {
-		outdated := manager.isRecoveryConfOutdated(fakePodName)
-		assert.True(t, outdated)
-	})
-
-	t.Run("slave status error", func(t *testing.T) {
-		manager.slaveStatus = RowMap{
-			"Last_IO_Error": CellData{String: "some error"},
-		}
-
-		outdated := manager.isRecoveryConfOutdated(fakePodName)
-		assert.True(t, outdated)
-	})
 }
 
 func TestManager_Lock(t *testing.T) {

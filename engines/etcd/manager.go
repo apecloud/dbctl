@@ -32,7 +32,7 @@ import (
 )
 
 const (
-	endpoint = "endpoint"
+	defaultEndpoint = "endpoint"
 
 	defaultPort        = 2379
 	defaultDialTimeout = 600 * time.Millisecond
@@ -46,8 +46,11 @@ type Manager struct {
 
 var _ engines.DBManager = &Manager{}
 
-func NewManager(properties engines.Properties) (engines.DBManager, error) {
+func NewManager() (engines.DBManager, error) {
 	logger := ctrl.Log.WithName("ETCD")
+	properties := map[string]string{
+		defaultEndpoint: "127.0.0.1:2379",
+	}
 
 	managerBase, err := engines.NewDBManagerBase(logger)
 	if err != nil {
@@ -59,7 +62,7 @@ func NewManager(properties engines.Properties) (engines.DBManager, error) {
 	}
 
 	var endpoints []string
-	endpoint, ok := properties[endpoint]
+	endpoint, ok := properties[defaultEndpoint]
 	if ok {
 		mgr.endpoint = endpoint
 		endpoints = []string{endpoint}

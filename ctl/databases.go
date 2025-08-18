@@ -56,7 +56,7 @@ dbctl mongodb createuser --username root --password password
 		viper.SetDefault(constant.KBEnvEngineType, commands[0])
 
 		// Initialize DB Manager
-		err := register.InitDBManager(configDir, "")
+		err := register.InitDBManager(dbType)
 		if err != nil {
 			return errors.Wrap(err, "DB manager initialize failed")
 		}

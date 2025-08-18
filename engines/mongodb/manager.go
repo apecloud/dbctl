@@ -45,10 +45,10 @@ type Manager struct {
 var Mgr *Manager
 var _ engines.DBManager = &Manager{}
 
-func NewManager(properties engines.Properties) (engines.DBManager, error) {
+func NewManager() (engines.DBManager, error) {
 	ctx := context.Background()
 	logger := ctrl.Log.WithName("MongoDB")
-	config, err := NewConfig(properties)
+	config, err := NewConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -127,10 +127,6 @@ func (mgr *Manager) GetReplSetStatus(ctx context.Context) (*ReplSetStatus, error
 	return GetReplSetStatus(ctx, mgr.Client)
 }
 
-func (mgr *Manager) GetReplSetConfig(ctx context.Context) (*RSConfig, error) {
-	return GetReplSetConfig(ctx, mgr.Client)
-}
-
 func (mgr *Manager) GetMemberAddrsFromRSConfig(rsConfig *RSConfig) []string {
 	if rsConfig == nil {
 		return []string{}
@@ -141,31 +137,6 @@ func (mgr *Manager) GetMemberAddrsFromRSConfig(rsConfig *RSConfig) []string {
 		hosts[i] = member.Host
 	}
 	return hosts
-}
-
-func (mgr *Manager) GetReplSetClientWithHosts(ctx context.Context, hosts []string) (*mongo.Client, error) {
-	if len(hosts) == 0 {
-		err := errors.New("Get replset client without hosts")
-		mgr.Logger.Info("Get replset client without hosts", "error", err.Error())
-		return nil, err
-	}
-
-	opts := options.Client().
-		SetHosts(hosts).
-		SetReplicaSet(config.ReplSetName).
-		SetAuth(options.Credential{
-			Password: config.Password,
-			Username: config.Username,
-		}).
-		SetWriteConcern(writeconcern.Majority()).
-		SetReadPreference(readpref.Primary()).
-		SetDirect(false)
-
-	client, err := mongo.Connect(ctx, opts)
-	if err != nil {
-		return nil, errors.Wrap(err, "connect to mongodb")
-	}
-	return client, err
 }
 
 func (mgr *Manager) Lock(ctx context.Context, reason string) error {

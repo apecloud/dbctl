@@ -43,7 +43,7 @@ func (options *DeleteUserOptions) Validate() error {
 		Parameters: parameters,
 	}
 	options.Request = req
-	return options.Operation.PreCheck(context.Background(), req)
+	return options.PreCheck(context.Background(), req)
 }
 
 func (options *DeleteUserOptions) Run() error {

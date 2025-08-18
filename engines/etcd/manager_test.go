@@ -29,11 +29,6 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/apecloud/dbctl/constant"
-	"github.com/apecloud/dbctl/engines"
-)
-
-const (
-	urlWithPort = "127.0.0.1:2379"
 )
 
 // Test case for Init() function
@@ -43,19 +38,9 @@ var _ = Describe("ETCD DBManager", func() {
 	viper.Set(constant.KBEnvServicePassword, "testpassword")
 	Context("new db manager", func() {
 		It("with right configurations", func() {
-			properties := engines.Properties{
-				"endpoint": urlWithPort,
-			}
-			dbManger, err := NewManager(properties)
+			dbManger, err := NewManager()
 			Expect(err).Should(Succeed())
 			Expect(dbManger).ShouldNot(BeNil())
-		})
-
-		It("with wrong configurations", func() {
-			properties := engines.Properties{}
-			dbManger, err := NewManager(properties)
-			Expect(err).Should(HaveOccurred())
-			Expect(dbManger).Should(BeNil())
 		})
 	})
 
@@ -76,11 +61,7 @@ var _ = Describe("ETCD DBManager", func() {
 			etcdServer, err := StartEtcdServer()
 			Expect(err).Should(BeNil())
 			etcdServer.Stop()
-			testEndpoint := fmt.Sprintf("http://%s", etcdServer.ETCD.Clients[0].Addr().(*net.TCPAddr).String())
-			properties := engines.Properties{
-				"endpoint": testEndpoint,
-			}
-			manager, err := NewManager(properties)
+			manager, err := NewManager()
 			Expect(err).Should(BeNil())
 			Expect(manager).ShouldNot(BeNil())
 			Expect(manager.IsDBStartupReady()).Should(BeFalse())

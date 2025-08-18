@@ -52,10 +52,3 @@ dbctl service
 		<-stop
 	},
 }
-
-//func init() {
-//	httpserver.InitFlags(ServiceCmd.Flags())
-//	ServiceCmd.Flags().BoolP("help", "h", false, "Print this help message")
-//
-//	DatabaseCmd.AddCommand(ServiceCmd)
-//}

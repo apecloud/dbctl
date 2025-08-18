@@ -130,5 +130,5 @@ func (e *EmbeddedETCD) Start(peerAddress string) error {
 func (e *EmbeddedETCD) Stop() {
 	e.ETCD.Close()
 	e.ETCD.Server.Stop()
-	os.RemoveAll(e.tmpDir)
+	_ = os.RemoveAll(e.tmpDir)
 }

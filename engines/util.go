@@ -32,13 +32,6 @@ const (
 	CheckRoleChangedType
 )
 
-func MaxInt64(x, y int64) int64 {
-	if x > y {
-		return x
-	}
-	return y
-}
-
 func GetIndex(memberName string) (int, error) {
 	i := strings.LastIndex(memberName, "-")
 	if i < 0 {

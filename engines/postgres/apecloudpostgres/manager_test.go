@@ -30,16 +30,12 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/apecloud/dbctl/constant"
-	"github.com/apecloud/dbctl/engines"
 	"github.com/apecloud/dbctl/engines/models"
 	"github.com/apecloud/dbctl/engines/postgres"
 )
 
 func MockDatabase(t *testing.T) (*Manager, pgxmock.PgxPoolIface, error) {
-	properties := map[string]string{
-		postgres.ConnectionURLKey: "user=test password=test host=localhost port=5432 dbname=postgres",
-	}
-	testConfig, err := postgres.NewConfig(properties)
+	testConfig, err := postgres.NewConfig()
 	assert.NotNil(t, testConfig)
 	assert.Nil(t, err)
 
@@ -52,7 +48,7 @@ func MockDatabase(t *testing.T) (*Manager, pgxmock.PgxPoolIface, error) {
 		t.Fatal(err)
 	}
 
-	dbManager, err := NewManager(engines.Properties(properties))
+	dbManager, err := NewManager()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -61,85 +57,6 @@ func MockDatabase(t *testing.T) (*Manager, pgxmock.PgxPoolIface, error) {
 	manager.Pool = mock
 
 	return manager, mock, err
-}
-
-func TestIsConsensusReadyUp(t *testing.T) {
-	ctx := context.TODO()
-	manager, mock, _ := MockDatabase(t)
-	defer mock.Close()
-
-	t.Run("consensus has been ready up", func(t *testing.T) {
-		mock.ExpectQuery("SELECT extname FROM pg_extension").
-			WillReturnRows(pgxmock.NewRows([]string{"extname"}).AddRow("consensus_monitor"))
-
-		isReadyUp := manager.isConsensusReadyUp(ctx)
-		assert.True(t, isReadyUp)
-	})
-
-	t.Run("consensus has not been ready up", func(t *testing.T) {
-		mock.ExpectQuery("SELECT extname FROM pg_extension").
-			WillReturnRows(pgxmock.NewRows([]string{"extname"}))
-
-		isReadyUp := manager.isConsensusReadyUp(ctx)
-		assert.False(t, isReadyUp)
-	})
-
-	t.Run("query pg_extension error", func(t *testing.T) {
-		mock.ExpectQuery("SELECT extname FROM pg_extension").
-			WillReturnError(fmt.Errorf("some errors"))
-
-		isReadyUp := manager.isConsensusReadyUp(ctx)
-		assert.False(t, isReadyUp)
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
-}
-
-func TestIsDBStartupReady(t *testing.T) {
-	manager, mock, _ := MockDatabase(t)
-	defer mock.Close()
-
-	t.Run("db start up has been set", func(t *testing.T) {
-		manager.DBStartupReady = true
-
-		isReady := manager.IsDBStartupReady()
-		assert.True(t, isReady)
-	})
-
-	t.Run("ping db failed", func(t *testing.T) {
-		manager.DBStartupReady = false
-		mock.ExpectPing().
-			WillReturnError(fmt.Errorf("some error"))
-
-		isReady := manager.IsDBStartupReady()
-		assert.False(t, isReady)
-	})
-
-	t.Run("ping db success but consensus not ready up", func(t *testing.T) {
-		manager.DBStartupReady = false
-		mock.ExpectPing()
-		mock.ExpectQuery("SELECT extname FROM pg_extension").
-			WillReturnRows(pgxmock.NewRows([]string{"extname"}))
-
-		isReady := manager.IsDBStartupReady()
-		assert.False(t, isReady)
-	})
-
-	t.Run("db is startup ready", func(t *testing.T) {
-		manager.DBStartupReady = false
-		mock.ExpectPing()
-		mock.ExpectQuery("SELECT extname FROM pg_extension").
-			WillReturnRows(pgxmock.NewRows([]string{"extname"}).AddRow("consensus_monitor"))
-
-		isReady := manager.IsDBStartupReady()
-		assert.True(t, isReady)
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
 }
 
 func TestGetMemberRoleWithHost(t *testing.T) {

@@ -20,7 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package mongodb
 
 import (
-	"errors"
 	"net"
 	"strconv"
 	"time"
@@ -32,94 +31,68 @@ import (
 )
 
 const (
-	host             = "host"
-	username         = "username"
-	password         = "password"
-	server           = "server"
-	databaseName     = "databaseName"
-	operationTimeout = "operationTimeout"
-	params           = "params"
-	adminDatabase    = "admin"
+	host          = "host"
+	username      = "username"
+	password      = "password"
+	databaseName  = "databaseName"
+	adminDatabase = "admin"
 
-	defaultTimeout  = 5 * time.Second
-	defaultDBPort   = 27017
-	RootUserEnv     = "MONGODB_USER"
-	RootPasswordEnv = "MONGODB_PASSWORD"
+	defaultTimeout             = 5 * time.Second
+	defaultDBPort              = 27017
+	UserEnv                    = "MONGODB_USER"
+	PasswordEnv                = "MONGODB_PASSWORD"
+	RootUserEnv                = "MONGODB_ROOT_USER"
+	RootPasswordEnv            = "MONGODB_ROOT_PASSWORD"
+	ClusterRoleEnv             = "MONGODB_CLUSTER_ROLE"
+	GrantAnyActionPrivilegeEnv = "MONGODB_GRANT_ANYACTION_PRIVILEGE"
 )
 
 type Config struct {
-	Hosts            []string
-	Username         string
-	Password         string
-	ReplSetName      string
-	DatabaseName     string
-	Params           string
-	Direct           bool
-	OperationTimeout time.Duration
+	Hosts                   []string
+	Username                string
+	Password                string
+	ReplSetName             string
+	DatabaseName            string
+	Params                  string
+	Direct                  bool
+	OperationTimeout        time.Duration
+	ConfigSvr               bool
+	GrantAnyActionPrivilege bool
 }
 
 var config *Config
 
-func NewConfig(properties map[string]string) (*Config, error) {
+func NewConfig() (*Config, error) {
 	config = &Config{
 		Direct:           true,
 		Username:         "root",
+		Hosts:            []string{"127.0.0.1:27017"},
+		Params:           "?directConnection=true",
 		OperationTimeout: defaultTimeout,
-	}
-
-	if val, ok := properties[host]; ok && val != "" {
-		config.Hosts = []string{val}
 	}
 
 	if viper.IsSet(constant.KBEnvServicePort) {
 		config.Hosts = []string{"localhost:" + viper.GetString(constant.KBEnvServicePort)}
 	}
 
-	if len(config.Hosts) == 0 {
-		return nil, errors.New("must set 'host' in metadata or KB_SERVICE_PORT environment variable")
+	_ = viper.BindEnv(constant.ConfigKeyUserName, constant.KBEnvServiceUser, RootUserEnv, UserEnv)
+	if viper.IsSet(constant.ConfigKeyUserName) {
+		config.Username = viper.GetString(constant.ConfigKeyUserName)
 	}
 
-	if val, ok := properties[username]; ok && val != "" {
-		config.Username = val
+	_ = viper.BindEnv(constant.ConfigKeyPassword, constant.KBEnvServicePassword, RootPasswordEnv, PasswordEnv)
+	if viper.IsSet(constant.ConfigKeyPassword) {
+		config.Password = viper.GetString(constant.ConfigKeyPassword)
 	}
 
-	if val, ok := properties[password]; ok && val != "" {
-		config.Password = val
+	if viper.IsSet(ClusterRoleEnv) {
+		config.ConfigSvr = viper.GetString(ClusterRoleEnv) == "configsvr"
 	}
-
-	if viper.IsSet(constant.KBEnvServiceUser) {
-		config.Username = viper.GetString(constant.KBEnvServiceUser)
-	} else if viper.IsSet(RootUserEnv) {
-		config.Username = viper.GetString(RootUserEnv)
-
+	if viper.IsSet(GrantAnyActionPrivilegeEnv) {
+		config.GrantAnyActionPrivilege = viper.GetBool(GrantAnyActionPrivilegeEnv)
 	}
-
-	if viper.IsSet(constant.KBEnvServicePassword) {
-		config.Password = viper.GetString(constant.KBEnvServicePassword)
-	} else if viper.IsSet(RootPasswordEnv) {
-		config.Password = viper.GetString(RootPasswordEnv)
-	}
-
-	if clusterCompName := constant.GetClusterCompName(); clusterCompName != "" {
-		config.ReplSetName = clusterCompName
-	}
-
+	config.ReplSetName = constant.GetClusterCompName()
 	config.DatabaseName = adminDatabase
-	if val, ok := properties[databaseName]; ok && val != "" {
-		config.DatabaseName = val
-	}
-
-	if val, ok := properties[params]; ok && val != "" {
-		config.Params = val
-	}
-
-	var err error
-	if val, ok := properties[operationTimeout]; ok && val != "" {
-		config.OperationTimeout, err = time.ParseDuration(val)
-		if err != nil {
-			return nil, errors.New("incorrect operationTimeout field from metadata")
-		}
-	}
 
 	return config, nil
 }
@@ -141,8 +114,4 @@ func (config *Config) GetDBPort() int {
 func (config *Config) DeepCopy() *Config {
 	newConf, _ := utilconfig.Clone(config)
 	return newConf.(*Config)
-}
-
-func GetConfig() *Config {
-	return config
 }

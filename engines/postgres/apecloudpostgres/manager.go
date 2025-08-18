@@ -21,9 +21,7 @@ package apecloudpostgres
 
 import (
 	"context"
-	"fmt"
 	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cast"
@@ -35,18 +33,16 @@ import (
 
 type Manager struct {
 	postgres.Manager
-	memberAddrs  []string
-	healthStatus *postgres.ConsensusMemberHealthStatus
 }
 
 var _ engines.DBManager = &Manager{}
 
 var Mgr *Manager
 
-func NewManager(properties engines.Properties) (engines.DBManager, error) {
+func NewManager() (engines.DBManager, error) {
 	Mgr = &Manager{}
 
-	baseManager, err := postgres.NewManager(properties)
+	baseManager, err := postgres.NewManager()
 	if err != nil {
 		return nil, errors.Errorf("new base manager failed, err: %v", err)
 	}
@@ -62,43 +58,6 @@ func (mgr *Manager) IsLeaderWithHost(ctx context.Context, host string) (bool, er
 	}
 
 	return role == strings.ToLower(models.LEADER), nil
-}
-
-func (mgr *Manager) IsDBStartupReady() bool {
-	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
-	defer cancel()
-	if mgr.DBStartupReady {
-		return true
-	}
-
-	if !mgr.IsPgReady(ctx) {
-		return false
-	}
-
-	if !mgr.isConsensusReadyUp(ctx) {
-		return false
-	}
-
-	mgr.DBStartupReady = true
-	mgr.Logger.Info("DB startup ready")
-	return true
-}
-
-func (mgr *Manager) isConsensusReadyUp(ctx context.Context) bool {
-	sql := `SELECT extname FROM pg_extension WHERE extname = 'consensus_monitor';`
-	resp, err := mgr.Query(ctx, sql)
-	if err != nil {
-		mgr.Logger.Error(err, fmt.Sprintf("query sql:%s failed", sql))
-		return false
-	}
-
-	resMap, err := postgres.ParseQuery(string(resp))
-	if err != nil {
-		mgr.Logger.Error(err, fmt.Sprintf("parse query response:%s failed", string(resp)))
-		return false
-	}
-
-	return resMap[0]["extname"] != nil
 }
 
 func (mgr *Manager) GetMemberRoleWithHost(ctx context.Context, host string) (string, error) {

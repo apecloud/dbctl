@@ -43,25 +43,22 @@ var (
 
 type Manager struct {
 	engines.DBManagerBase
-	client         redis.UniversalClient
-	clientSettings *Settings
-	sentinelClient *redis.SentinelClient
-
-	ctx                     context.Context
-	cancel                  context.CancelFunc
-	startAt                 time.Time
-	role                    string
-	roleSubscribeUpdateTime int64
-	roleProbePeriod         int64
-	masterName              string
-	currentRedisHost        string
-	currentRedisPort        string
+	client           redis.UniversalClient
+	clientSettings   *Settings
+	sentinelClient   *redis.SentinelClient
+	roleProbePeriod  int64
+	masterName       string
+	currentRedisHost string
+	currentRedisPort string
 }
 
 var _ engines.DBManager = &Manager{}
 
-func NewManager(properties engines.Properties) (engines.DBManager, error) {
+func NewManager() (engines.DBManager, error) {
 	logger := ctrl.Log.WithName("Redis")
+	properties := map[string]string{
+		"redisHost": "127.0.0.1:6379",
+	}
 
 	if viper.IsSet("REDIS_DEFAULT_USER") {
 		redisUser = viper.GetString("REDIS_DEFAULT_USER")

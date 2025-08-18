@@ -31,7 +31,6 @@ import (
 
 const (
 	ClusterType = "cluster"
-	NodeType    = "node"
 )
 
 func ParseClientFromProperties(properties map[string]string, defaultSettings *Settings) (client redis.UniversalClient, settings *Settings, err error) {

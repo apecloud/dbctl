@@ -44,10 +44,10 @@ var _ engines.DBManager = &Manager{}
 
 var Mgr *Manager
 
-func NewManager(properties engines.Properties) (engines.DBManager, error) {
+func NewManager() (engines.DBManager, error) {
 	Mgr = &Manager{}
 
-	baseManager, err := postgres.NewManager(properties)
+	baseManager, err := postgres.NewManager()
 	if err != nil {
 		return nil, errors.Errorf("new base manager failed, err: %v", err)
 	}

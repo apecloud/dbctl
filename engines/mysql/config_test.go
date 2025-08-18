@@ -21,39 +21,14 @@ package mysql
 
 import (
 	"testing"
-	"time"
 
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/apecloud/dbctl/constant"
-	"github.com/apecloud/dbctl/engines"
 )
 
 const (
-	fakeUser     = "fake-user"
-	fakePassword = "fake-password"
-	fakePemPath  = "fake-pem-path"
-	fakeAddr     = "fake-addr"
-)
-
-var (
-	fakeProperties = engines.Properties{
-		connectionURLKey:   "root:@tcp(127.0.0.1:3306)/mysql?multiStatements=true",
-		maxOpenConnsKey:    "5",
-		maxIdleConnsKey:    "4",
-		connMaxLifetimeKey: "10m",
-		connMaxIdleTimeKey: "500s",
-	}
-
-	fakePropertiesWithPem = engines.Properties{
-		pemPathKey: fakePemPath,
-	}
-
-	fakePropertiesWithWrongURL = engines.Properties{
-		connectionURLKey: "fake-url",
-	}
+	fakeAddr = "fake-addr"
 )
 
 func TestNewConfig(t *testing.T) {
@@ -63,60 +38,19 @@ func TestNewConfig(t *testing.T) {
 		viper.Reset()
 	}()
 
-	t.Run("with empty properties", func(t *testing.T) {
-		fakeConfig, err := NewConfig(map[string]string{})
+	t.Run("with default", func(t *testing.T) {
+		fakeConfig, err := NewConfig()
 		assert.Nil(t, err)
 		assert.NotNil(t, fakeConfig)
 		assert.Equal(t, "root:@tcp(127.0.0.1:3306)/mysql?multiStatements=true", fakeConfig.URL)
-	})
-
-	t.Run("with default properties", func(t *testing.T) {
-		viper.Set(constant.KBEnvServiceUser, fakeUser)
-		viper.Set(constant.KBEnvServicePassword, fakePassword)
-
-		fakeConfig, err := NewConfig(fakeProperties)
-		assert.Nil(t, err)
-		assert.NotNil(t, fakeConfig)
-		assert.Equal(t, "root:@tcp(127.0.0.1:3306)/mysql?multiStatements=true", fakeConfig.URL)
-		assert.Equal(t, 5, fakeConfig.maxOpenConns)
-		assert.Equal(t, 4, fakeConfig.maxIdleConns)
-		assert.Equal(t, time.Minute*10, fakeConfig.connMaxLifetime)
-		assert.Equal(t, time.Second*500, fakeConfig.connMaxIdletime)
-		assert.Equal(t, fakeUser, fakeConfig.Username)
-		assert.Equal(t, fakePassword, fakeConfig.Password)
-	})
-
-	t.Run("can't open pem file", func(t *testing.T) {
-		fakeConfig, err := NewConfig(fakePropertiesWithPem)
-		assert.Nil(t, fakeConfig)
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "Error reading PEM file from fake-pem-path")
-	})
-
-	f, err := fs.Create(fakePemPath)
-	assert.Nil(t, err)
-	_ = f.Close()
-	t.Run("", func(t *testing.T) {
-		fakeConfig, err := NewConfig(fakePropertiesWithPem)
-		assert.Nil(t, fakeConfig)
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "failed to append PEM")
+		assert.Equal(t, 5, fakeConfig.MaxOpenConns)
+		assert.Equal(t, 1, fakeConfig.MaxIdleConns)
 	})
 }
 
 func TestConfig_GetLocalDBConn(t *testing.T) {
-	t.Run("parse dsn failed", func(t *testing.T) {
-		fakeConfig, err := NewConfig(fakePropertiesWithWrongURL)
-		assert.Nil(t, err)
-
-		db, err := fakeConfig.GetLocalDBConn()
-		assert.Nil(t, db)
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "illegal Data Source Name (DNS) specified by url")
-	})
-
 	t.Run("get DB connection with addr successfully", func(t *testing.T) {
-		fakeConfig, err := NewConfig(fakeProperties)
+		fakeConfig, err := NewConfig()
 		assert.Nil(t, err)
 
 		db, err := fakeConfig.GetLocalDBConn()
@@ -126,18 +60,8 @@ func TestConfig_GetLocalDBConn(t *testing.T) {
 }
 
 func TestConfig_GetDBConnWithAddr(t *testing.T) {
-	t.Run("parse dsn failed", func(t *testing.T) {
-		fakeConfig, err := NewConfig(fakePropertiesWithWrongURL)
-		assert.Nil(t, err)
-
-		db, err := fakeConfig.GetDBConnWithAddr(fakeAddr)
-		assert.Nil(t, db)
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "illegal Data Source Name (DNS) specified by url")
-	})
-
 	t.Run("get local DB connection successfully", func(t *testing.T) {
-		fakeConfig, err := NewConfig(fakeProperties)
+		fakeConfig, err := NewConfig()
 		assert.Nil(t, err)
 
 		db, err := fakeConfig.GetDBConnWithAddr(fakeAddr)
@@ -148,7 +72,7 @@ func TestConfig_GetDBConnWithAddr(t *testing.T) {
 
 func TestConfig_GetDBPort(t *testing.T) {
 	t.Run("parse dsn failed", func(t *testing.T) {
-		fakeConfig, err := NewConfig(fakePropertiesWithWrongURL)
+		fakeConfig, err := NewConfig()
 		assert.Nil(t, err)
 
 		port := fakeConfig.GetDBPort()
@@ -156,7 +80,7 @@ func TestConfig_GetDBPort(t *testing.T) {
 	})
 
 	t.Run("get db port successfully", func(t *testing.T) {
-		fakeConfig, err := NewConfig(fakeProperties)
+		fakeConfig, err := NewConfig()
 		assert.Nil(t, err)
 
 		port := fakeConfig.GetDBPort()

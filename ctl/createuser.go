@@ -50,7 +50,7 @@ func (options *CreateUserOptions) Validate() error {
 		Parameters: parameters,
 	}
 	options.Request = req
-	return options.Operation.PreCheck(context.Background(), req)
+	return options.PreCheck(context.Background(), req)
 }
 
 func (options *CreateUserOptions) Run() error {

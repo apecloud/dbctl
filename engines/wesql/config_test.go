@@ -23,33 +23,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/apecloud/dbctl/engines"
-)
-
-var (
-	fakeProperties = engines.Properties{
-		"url":          "root:@tcp(127.0.0.1:3306)/mysql?multiStatements=true",
-		"maxOpenConns": "5",
-	}
-	fakePropertiesWithWrongURL = engines.Properties{
-		"url": "root:@tcp(127.0.0.1:3306)mysql",
-	}
-	fakePropertiesWithWrongPem = engines.Properties{
-		"pemPath": "fake-path",
-	}
 )
 
 func TestNewConfig(t *testing.T) {
-	t.Run("new config failed", func(t *testing.T) {
-		fakeConfig, err := NewConfig(fakePropertiesWithWrongPem)
-
-		assert.Nil(t, fakeConfig)
-		assert.NotNil(t, err)
-	})
-
 	t.Run("new config successfully", func(t *testing.T) {
-		fakeConfig, err := NewConfig(fakeProperties)
+		fakeConfig, err := NewConfig()
 
 		assert.NotNil(t, fakeConfig)
 		assert.Nil(t, err)

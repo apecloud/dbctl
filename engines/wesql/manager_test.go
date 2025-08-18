@@ -60,15 +60,8 @@ func mockDatabase(t *testing.T) (*Manager, sqlmock.Sqlmock, error) {
 }
 
 func TestNewManager(t *testing.T) {
-	t.Run("new config failed", func(t *testing.T) {
-		manager, err := NewManager(fakePropertiesWithWrongPem)
-
-		assert.Nil(t, manager)
-		assert.NotNil(t, err)
-	})
-
 	t.Run("new mysql manager failed", func(t *testing.T) {
-		manager, err := NewManager(fakeProperties)
+		manager, err := NewManager()
 
 		assert.Nil(t, manager)
 		assert.NotNil(t, err)
@@ -77,7 +70,7 @@ func TestNewManager(t *testing.T) {
 	viper.Set(constant.KBEnvPodName, fakePodName)
 	defer viper.Reset()
 	t.Run("new manger successfully", func(t *testing.T) {
-		manager, err := NewManager(fakeProperties)
+		manager, err := NewManager()
 
 		assert.Nil(t, err)
 		assert.NotNil(t, manager)

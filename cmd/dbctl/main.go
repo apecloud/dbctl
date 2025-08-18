@@ -40,19 +40,16 @@ import (
 	opsregister "github.com/apecloud/dbctl/operations/register"
 )
 
-var configDir string
 var disableDNSChecker bool
 var engineType string
 
 func init() {
 	viper.AutomaticEnv()
-	pflag.StringVar(&configDir, "config-path", "/config/lorry/components/", "Lorry default config directory for builtin type")
 	pflag.BoolVar(&disableDNSChecker, "disable-dns-checker", false, "disable dns checker, for test&dev")
 	pflag.StringVar(&engineType, "engine", "", "Database engine type, e.g., mysql, postgres, mongodb, etc.")
 }
 
 func main() {
-	// Set GOMAXPROCS
 	_, _ = maxprocs.Set()
 
 	// Initialize flags
@@ -69,14 +66,14 @@ func main() {
 	}
 
 	// Initialize logger
-	kopts := []kzap.Opts{kzap.UseFlagOptions(&opts)}
+	kOpts := []kzap.Opts{kzap.UseFlagOptions(&opts)}
 	if strings.EqualFold("debug", viper.GetString("zap-log-level")) {
-		kopts = append(kopts, kzap.RawZapOpts(zap.AddCaller()))
+		kOpts = append(kOpts, kzap.RawZapOpts(zap.AddCaller()))
 	}
-	ctrl.SetLogger(kzap.New(kopts...))
+	ctrl.SetLogger(kzap.New(kOpts...))
 
 	// Initialize DB Manager
-	err = register.InitDBManager(configDir, engineType)
+	err = register.InitDBManager(engineType)
 	if err != nil {
 		panic(errors.Wrap(err, "DB manager initialize failed"))
 	}

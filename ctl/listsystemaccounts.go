@@ -35,7 +35,7 @@ type ListSystemAccountsOptions struct {
 }
 
 func (options *ListSystemAccountsOptions) Validate() error {
-	return options.Operation.PreCheck(context.Background(), nil)
+	return options.PreCheck(context.Background(), nil)
 }
 
 func (options *ListSystemAccountsOptions) Run() error {

@@ -37,14 +37,14 @@ type Manager struct {
 
 var _ engines.DBManager = &Manager{}
 
-func NewManager(properties engines.Properties) (engines.DBManager, error) {
+func NewManager() (engines.DBManager, error) {
 	logger := ctrl.Log.WithName("WeSQL")
-	_, err := NewConfig(properties)
+	_, err := NewConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	mysqlMgr, err := mysql.NewManager(properties)
+	mysqlMgr, err := mysql.NewManager()
 	if err != nil {
 		return nil, err
 	}

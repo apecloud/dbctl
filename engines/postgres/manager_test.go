@@ -29,14 +29,10 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/apecloud/dbctl/constant"
-	"github.com/apecloud/dbctl/engines"
 )
 
 func MockDatabase(t *testing.T) (*Manager, pgxmock.PgxPoolIface, error) {
-	properties := map[string]string{
-		ConnectionURLKey: "user=test password=test host=localhost port=5432 dbname=postgres",
-	}
-	testConfig, err := NewConfig(properties)
+	testConfig, err := NewConfig()
 	assert.NotNil(t, testConfig)
 	assert.Nil(t, err)
 
@@ -49,7 +45,7 @@ func MockDatabase(t *testing.T) (*Manager, pgxmock.PgxPoolIface, error) {
 		t.Fatal(err)
 	}
 
-	dbManager, err := NewManager(engines.Properties(properties))
+	dbManager, err := NewManager()
 	if err != nil {
 		t.Fatal(err)
 	}

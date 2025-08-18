@@ -48,16 +48,16 @@ type CheckRunning struct {
 	FailedEventReportFrequency int
 }
 
-var checkrunning operations.Operation = &CheckRunning{}
+var checkRunning operations.Operation = &CheckRunning{}
 
 func init() {
-	err := operations.Register("checkrunning", checkrunning)
+	err := operations.Register("checkrunning", checkRunning)
 	if err != nil {
 		panic(err.Error())
 	}
 }
 
-func (s *CheckRunning) Init(ctx context.Context) error {
+func (s *CheckRunning) Init(context.Context) error {
 	s.FailedEventReportFrequency = viper.GetInt("KB_FAILED_EVENT_REPORT_FREQUENCY")
 	if s.FailedEventReportFrequency < 300 {
 		s.FailedEventReportFrequency = 300
@@ -77,7 +77,7 @@ func (s *CheckRunning) Init(ctx context.Context) error {
 	return nil
 }
 
-func (s *CheckRunning) Do(ctx context.Context, req *operations.OpsRequest) (*operations.OpsResponse, error) {
+func (s *CheckRunning) Do(ctx context.Context, _ *operations.OpsRequest) (*operations.OpsResponse, error) {
 	manager, err := register.GetDBManager()
 	if err != nil {
 		return nil, errors.Wrap(err, "get manager failed")
@@ -93,7 +93,7 @@ func (s *CheckRunning) Do(ctx context.Context, req *operations.OpsRequest) (*ope
 	}
 
 	host := net.JoinHostPort(s.DBAddress, strconv.Itoa(dbPort))
-	// sql exec timeout needs to be less than httpget's timeout which by default 1s.
+	// sql exec timeout needs to be less than http timeout of get which by default 1s.
 	conn, err := net.DialTimeout("tcp", host, 500*time.Millisecond)
 	if err != nil {
 		message = fmt.Sprintf("running check %s error", host)
@@ -108,7 +108,9 @@ func (s *CheckRunning) Do(ctx context.Context, req *operations.OpsRequest) (*ope
 		s.CheckRunningFailedCount++
 		return opsRsp, err
 	}
-	defer conn.Close()
+	defer func() {
+		_ = conn.Close()
+	}()
 	s.CheckRunningFailedCount = 0
 	message = "TCP Connection Established Successfully!"
 	if tcpCon, ok := conn.(*net.TCPConn); ok {

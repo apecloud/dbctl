@@ -42,9 +42,9 @@ type Manager struct {
 	isLeader     int
 }
 
-func NewManager(properties map[string]string) (engines.DBManager, error) {
+func NewManager() (engines.DBManager, error) {
 	logger := ctrl.Log.WithName("PostgreSQL")
-	config, err := NewConfig(properties)
+	config, err := NewConfig()
 	if err != nil {
 		return nil, err
 	}

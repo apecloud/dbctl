@@ -22,8 +22,6 @@ package engines
 import (
 	"context"
 	"fmt"
-
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 type MockManager struct {
@@ -31,21 +29,6 @@ type MockManager struct {
 }
 
 var _ DBManager = &MockManager{}
-
-func NewMockManager(properties Properties) (DBManager, error) {
-	logger := ctrl.Log.WithName("MockManager")
-
-	managerBase, err := NewDBManagerBase(logger)
-	if err != nil {
-		return nil, err
-	}
-
-	Mgr := &MockManager{
-		DBManagerBase: *managerBase,
-	}
-
-	return Mgr, nil
-}
 
 func (*MockManager) IsDBStartupReady() bool {
 	return true
