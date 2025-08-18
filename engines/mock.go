@@ -24,8 +24,6 @@ import (
 	"fmt"
 
 	ctrl "sigs.k8s.io/controller-runtime"
-
-	"github.com/apecloud/dbctl/dcs"
 )
 
 type MockManager struct {
@@ -56,84 +54,8 @@ func (*MockManager) IsDBStartupReady() bool {
 	return true
 }
 
-func (*MockManager) InitializeCluster(context.Context, *dcs.Cluster) error {
-	return fmt.Errorf("NotSupported")
-}
-func (*MockManager) IsClusterInitialized(context.Context, *dcs.Cluster) (bool, error) {
-	return false, fmt.Errorf("NotSupported")
-}
-
-func (*MockManager) IsCurrentMemberInCluster(context.Context, *dcs.Cluster) bool {
-	return true
-}
-
-func (*MockManager) IsCurrentMemberHealthy(context.Context, *dcs.Cluster) bool {
-	return true
-}
-
-func (*MockManager) IsClusterHealthy(context.Context, *dcs.Cluster) bool {
-	return true
-}
-
-func (*MockManager) IsMemberHealthy(context.Context, *dcs.Cluster, *dcs.Member) bool {
-	return true
-}
-
-func (*MockManager) HasOtherHealthyLeader(context.Context, *dcs.Cluster) *dcs.Member {
-	return nil
-}
-
-func (*MockManager) HasOtherHealthyMembers(context.Context, *dcs.Cluster, string) []*dcs.Member {
-	return nil
-}
-
-func (*MockManager) IsLeader(context.Context, *dcs.Cluster) (bool, error) {
-	return false, fmt.Errorf("NotSupported")
-}
-
-func (*MockManager) IsLeaderMember(context.Context, *dcs.Cluster, *dcs.Member) (bool, error) {
-	return false, fmt.Errorf("NotSupported")
-}
-
 func (*MockManager) IsFirstMember() bool {
 	return true
-}
-
-func (*MockManager) JoinCurrentMemberToCluster(context.Context, *dcs.Cluster) error {
-	return fmt.Errorf("NotSupported")
-}
-
-func (*MockManager) LeaveMemberFromCluster(context.Context, *dcs.Cluster, string) error {
-	return fmt.Errorf("NotSupported")
-}
-
-func (*MockManager) Promote(context.Context, *dcs.Cluster) error {
-	return fmt.Errorf("NotSupported")
-}
-
-func (*MockManager) IsPromoted(context.Context) bool {
-	return true
-}
-
-func (*MockManager) Demote(context.Context) error {
-	return fmt.Errorf("NotSupported")
-}
-
-func (*MockManager) Follow(context.Context, *dcs.Cluster) error {
-	return fmt.Errorf("NotSupported")
-}
-
-func (*MockManager) Recover(context.Context, *dcs.Cluster) error {
-	return nil
-
-}
-
-func (*MockManager) GetHealthiestMember(*dcs.Cluster, string) *dcs.Member {
-	return nil
-}
-
-func (*MockManager) GetMemberAddrs(context.Context, *dcs.Cluster) []string {
-	return nil
 }
 
 func (*MockManager) IsRootCreated(context.Context) (bool, error) {

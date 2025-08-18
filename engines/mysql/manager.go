@@ -31,7 +31,6 @@ import (
 	"github.com/pkg/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/apecloud/dbctl/dcs"
 	"github.com/apecloud/dbctl/engines"
 )
 
@@ -83,10 +82,6 @@ func NewManager(properties engines.Properties) (engines.DBManager, error) {
 	return mgr, nil
 }
 
-func (mgr *Manager) InitializeCluster(context.Context, *dcs.Cluster) error {
-	return nil
-}
-
 func (mgr *Manager) IsRunning() bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
@@ -126,189 +121,6 @@ func (mgr *Manager) IsDBStartupReady() bool {
 	mgr.DBStartupReady = true
 	mgr.Logger.Info("DB startup ready")
 	return true
-}
-
-func (mgr *Manager) IsReadonly(ctx context.Context, cluster *dcs.Cluster, member *dcs.Member) (bool, error) {
-	db, err := mgr.GetMemberConnection(cluster, member)
-	if err != nil {
-		mgr.Logger.Info("Get Member conn failed", "error", err.Error())
-		return false, err
-	}
-
-	var readonly bool
-	err = db.QueryRowContext(ctx, "select @@global.hostname, @@global.version, "+
-		"@@global.read_only, @@global.binlog_format, @@global.log_bin, @@global.log_slave_updates").
-		Scan(&mgr.hostname, &mgr.version, &readonly, &mgr.binlogFormat,
-			&mgr.logbinEnabled, &mgr.logReplicationUpdatesEnabled)
-	if err != nil {
-		mgr.Logger.Info("Get global readonly failed", "error", err.Error())
-		return false, err
-	}
-	return readonly, nil
-}
-
-func (mgr *Manager) IsLeader(ctx context.Context, _ *dcs.Cluster) (bool, error) {
-	readonly, err := mgr.IsReadonly(ctx, nil, nil)
-
-	if err != nil || readonly {
-		return false, err
-	}
-
-	// if cluster.Leader != nil && cluster.Leader.Name != "" {
-	// 	if cluster.Leader.Name == mgr.CurrentMemberName {
-	// 		return true, nil
-	// 	} else {
-	// 		return false, nil
-	// 	}
-	// }
-
-	// // During the initialization of cluster, there would be more than one leader,
-	// // in this case, the first member is chosen as the leader
-	// if mgr.CurrentMemberName == cluster.Members[0].Name {
-	// 	return true, nil
-	// }
-	// isFirstMemberLeader, err := mgr.IsLeaderMember(ctx, cluster, &cluster.Members[0])
-	// if err == nil && isFirstMemberLeader {
-	// 	return false, nil
-	// }
-
-	return true, err
-}
-
-func (mgr *Manager) IsLeaderMember(ctx context.Context, cluster *dcs.Cluster, member *dcs.Member) (bool, error) {
-	readonly, err := mgr.IsReadonly(ctx, cluster, member)
-	if err != nil || readonly {
-		return false, err
-	}
-
-	return true, err
-}
-
-func (mgr *Manager) InitiateCluster(*dcs.Cluster) error {
-	return nil
-}
-
-func (mgr *Manager) GetMemberAddrs(_ context.Context, cluster *dcs.Cluster) []string {
-	return cluster.GetMemberAddrs()
-}
-
-func (mgr *Manager) IsCurrentMemberInCluster(context.Context, *dcs.Cluster) bool {
-	return true
-}
-
-func (mgr *Manager) IsCurrentMemberHealthy(ctx context.Context, cluster *dcs.Cluster) bool {
-	// _, _ = mgr.EnsureServerID(ctx)
-	member := cluster.GetMemberWithName(mgr.CurrentMemberName)
-
-	return mgr.IsMemberHealthy(ctx, cluster, member)
-}
-
-func (mgr *Manager) IsMemberLagging(ctx context.Context, cluster *dcs.Cluster, member *dcs.Member) (bool, int64) {
-	var leaderDBState *dcs.DBState
-	if cluster.Leader == nil || cluster.Leader.DBState == nil {
-		// In the event of leader initialization failure, there is no available database state information,
-		// just returning false allows other replicas to acquire the lease.
-		mgr.Logger.Info("No leader DBState info")
-		return false, 0
-	}
-	leaderDBState = cluster.Leader.DBState
-
-	db, err := mgr.GetMemberConnection(cluster, member)
-	if err != nil {
-		mgr.Logger.Info("Get Member conn failed", "error", err)
-		return true, 0
-	}
-
-	opTimestamp, err := mgr.GetOpTimestamp(ctx, db)
-	if err != nil {
-		mgr.Logger.Info("get op timestamp failed", "error", err)
-		return true, 0
-	}
-	lag := leaderDBState.OpTimestamp - opTimestamp
-	if lag <= cluster.HaConfig.GetMaxLagOnSwitchover() {
-		return false, lag
-	}
-	mgr.Logger.Info(fmt.Sprintf("The member %s has lag: %d", member.Name, lag))
-	return true, lag
-}
-
-func (mgr *Manager) IsMemberHealthy(ctx context.Context, cluster *dcs.Cluster, member *dcs.Member) bool {
-	db, err := mgr.GetMemberConnection(cluster, member)
-	if err != nil {
-		mgr.Logger.Info("Get Member conn failed", "error", err)
-		return false
-	}
-
-	if cluster.Leader != nil && cluster.Leader.Name == member.Name {
-		if mgr.WriteCheck(ctx, db) != nil {
-			return false
-		}
-	}
-	if mgr.ReadCheck(ctx, db) != nil {
-		return false
-	}
-
-	return true
-}
-
-func (mgr *Manager) GetDBState(ctx context.Context, cluster *dcs.Cluster) *dcs.DBState {
-	mgr.DBState = nil
-
-	globalState, err := mgr.GetGlobalState(ctx, mgr.DB)
-	if err != nil {
-		mgr.Logger.Info("select global failed", "error", err)
-		return nil
-	}
-
-	masterStatus, err := mgr.GetMasterStatus(ctx, mgr.DB)
-	if err != nil {
-		mgr.Logger.Info("show master status failed", "error", err)
-		return nil
-	}
-
-	slaveStatus, err := mgr.GetSlaveStatus(ctx, mgr.DB)
-	if err != nil {
-		mgr.Logger.Info("show slave status failed", "error", err)
-		return nil
-	}
-
-	opTimestamp, err := mgr.GetOpTimestamp(ctx, mgr.DB)
-	if err != nil {
-		mgr.Logger.Info("get op timestamp failed", "error", err)
-		return nil
-	}
-
-	dbState := &dcs.DBState{
-		OpTimestamp: opTimestamp,
-		Extra:       map[string]string{},
-	}
-	for k, v := range globalState {
-		dbState.Extra[k] = v
-	}
-
-	if cluster.Leader != nil && cluster.Leader.Name == mgr.CurrentMemberName {
-		dbState.Extra["Binlog_File"] = masterStatus.GetString("File")
-		dbState.Extra["Binlog_Pos"] = masterStatus.GetString("Pos")
-	} else {
-		dbState.Extra["Master_Host"] = slaveStatus.GetString("Master_Host")
-		dbState.Extra["Master_UUID"] = slaveStatus.GetString("Master_UUID")
-		dbState.Extra["Slave_IO_Running"] = slaveStatus.GetString("Slave_IO_Running")
-		dbState.Extra["Slave_SQL_Running"] = slaveStatus.GetString("Slave_SQL_Running")
-		dbState.Extra["Last_IO_Error"] = slaveStatus.GetString("Last_IO_Error")
-		dbState.Extra["Last_SQL_Error"] = slaveStatus.GetString("Last_SQL_Error")
-		dbState.Extra["Master_Log_File"] = slaveStatus.GetString("Master_Log_File")
-		dbState.Extra["Read_Master_Log_Pos"] = slaveStatus.GetString("Read_Master_Log_Pos")
-		dbState.Extra["Relay_Master_Log_File"] = slaveStatus.GetString("Relay_Master_Log_File")
-		dbState.Extra["Exec_Master_Log_Pos"] = slaveStatus.GetString("Exec_Master_Log_Pos")
-	}
-
-	mgr.globalState = globalState
-	mgr.masterStatus = masterStatus
-	mgr.slaveStatus = slaveStatus
-	mgr.opTimestamp = opTimestamp
-	mgr.DBState = dbState
-
-	return dbState
 }
 
 func (mgr *Manager) GetSecondsBehindMaster(ctx context.Context) (int, error) {
@@ -417,49 +229,6 @@ func (mgr *Manager) GetMasterStatus(context.Context, *sql.DB) (RowMap, error) {
 	return rowMap, nil
 }
 
-func (mgr *Manager) Recover(context.Context, *dcs.Cluster) error {
-	return nil
-}
-
-func (mgr *Manager) JoinCurrentMemberToCluster(context.Context, *dcs.Cluster) error {
-	return nil
-}
-
-func (mgr *Manager) LeaveMemberFromCluster(context.Context, *dcs.Cluster, string) error {
-	return nil
-}
-
-// func (mgr *Manager) IsClusterHealthy(ctx context.Context, cluster *dcs.Cluster) bool {
-// 	leaderMember := cluster.GetLeaderMember()
-// 	if leaderMember == nil {
-// 		mgr.Logger.Info("IsClusterHealthy: has no leader.")
-// 		return true
-// 	}
-
-// 	return mgr.IsMemberHealthy(ctx, cluster, leaderMember)
-// }
-
-// IsClusterInitialized is a method to check if cluster is initialized or not
-func (mgr *Manager) IsClusterInitialized(ctx context.Context, cluster *dcs.Cluster) (bool, error) {
-	_, err := mgr.GetVersion(ctx)
-	if err != nil {
-		return false, err
-	}
-
-	if cluster != nil {
-		isValid, err := mgr.ValidateAddr(ctx, cluster)
-		if err != nil || !isValid {
-			return isValid, err
-		}
-	}
-
-	// err = mgr.EnableSemiSyncIfNeed(ctx)
-	// if err != nil {
-	// 	return false, err
-	// }
-	return mgr.EnsureServerID(ctx)
-}
-
 func (mgr *Manager) GetVersion(ctx context.Context) (string, error) {
 	if mgr.version != "" {
 		return mgr.version, nil
@@ -469,22 +238,6 @@ func (mgr *Manager) GetVersion(ctx context.Context) (string, error) {
 		return "", errors.Wrap(err, "Get version failed")
 	}
 	return mgr.version, nil
-}
-
-func (mgr *Manager) ValidateAddr(ctx context.Context, cluster *dcs.Cluster) (bool, error) {
-	// The maximum length of the server addr is 255 characters. Before MySQL 8.0.17 it was 60 characters.
-	currentMemberName := mgr.GetCurrentMemberName()
-	member := cluster.GetMemberWithName(currentMemberName)
-	addr := cluster.GetMemberShortAddr(*member)
-	maxLength := 255
-	if IsBeforeVersion(mgr.version, "8.0.17") {
-		maxLength = 60
-	}
-
-	if len(addr) > maxLength {
-		return false, errors.Errorf("The length of the member address must be less than or equal to %d", maxLength)
-	}
-	return true, nil
 }
 
 func (mgr *Manager) EnsureServerID(ctx context.Context) (bool, error) {
@@ -557,44 +310,6 @@ func (mgr *Manager) EnableSemiSyncIfNeed(ctx context.Context) error {
 	return nil
 }
 
-func (mgr *Manager) Promote(ctx context.Context, cluster *dcs.Cluster) error {
-	err := mgr.EnableSemiSyncSource(ctx)
-	if err != nil {
-		return err
-	}
-
-	err = mgr.DisableSemiSyncReplica(ctx)
-	if err != nil {
-		return err
-	}
-
-	if (mgr.globalState["super_read_only"] == "0" && mgr.globalState["read_only"] == "0") &&
-		(len(mgr.slaveStatus) == 0 || (mgr.slaveStatus.GetString("Slave_IO_Running") == "No" &&
-			mgr.slaveStatus.GetString("Slave_SQL_Running") == "No")) {
-		return nil
-	}
-
-	// wait relay log to play
-	secondsBehindMaster, err := mgr.GetSecondsBehindMaster(ctx)
-	for err != nil || secondsBehindMaster != 0 {
-		time.Sleep(time.Second)
-		secondsBehindMaster, err = mgr.GetSecondsBehindMaster(ctx)
-	}
-
-	stopReadOnly := `set global read_only=off;set global super_read_only=off;`
-	stopSlave := `stop slave;`
-	resp, err := mgr.DB.Exec(stopReadOnly + stopSlave)
-	if err != nil {
-		mgr.Logger.Info("promote failed", "error", err.Error())
-		return err
-	}
-
-	// fresh db state
-	mgr.GetDBState(ctx, cluster)
-	mgr.Logger.Info(fmt.Sprintf("promote success, resp:%v", resp))
-	return nil
-}
-
 func (mgr *Manager) Demote(context.Context) error {
 	setReadOnly := `set global read_only=on;set global super_read_only=on;`
 
@@ -603,54 +318,6 @@ func (mgr *Manager) Demote(context.Context) error {
 		mgr.Logger.Info("demote failed", "error", err.Error())
 		return err
 	}
-	return nil
-}
-
-func (mgr *Manager) Follow(ctx context.Context, cluster *dcs.Cluster) error {
-	leaderMember := cluster.GetLeaderMember()
-	if leaderMember == nil {
-		return fmt.Errorf("cluster has no leader")
-	}
-
-	if mgr.CurrentMemberName == cluster.Leader.Name {
-		mgr.Logger.Info("i get the leader key, don't need to follow")
-		return nil
-	}
-
-	if !mgr.isRecoveryConfOutdated(cluster.Leader.Name) {
-		return nil
-	}
-	err := mgr.EnableSemiSyncReplica(ctx)
-	if err != nil {
-		return err
-	}
-	err = mgr.DisableSemiSyncSource(ctx)
-	if err != nil {
-		return err
-	}
-
-	stopSlave := `stop slave;`
-	// MySQL 5.7 has a limitation where the length of the master_host cannot exceed 60 characters.
-	masterHost := cluster.GetMemberShortAddr(*leaderMember)
-	changeMaster := fmt.Sprintf(`change master to master_host='%s',master_user='%s',master_password='%s',master_port=%s,master_auto_position=1;`,
-		masterHost, config.Username, config.Password, leaderMember.DBPort)
-	mgr.Logger.Info("follow new leader", "changemaster", changeMaster)
-	startSlave := `start slave;`
-
-	_, err = mgr.DB.Exec(stopSlave + changeMaster + startSlave)
-	if err != nil {
-		mgr.Logger.Info("Follow master failed", "error", err.Error())
-		return err
-	}
-
-	err = mgr.SetSemiSyncSourceTimeout(ctx, cluster, leaderMember)
-	if err != nil {
-		return err
-	}
-
-	// fresh db state
-	mgr.GetDBState(ctx, cluster)
-	mgr.Logger.Info("successfully follow new leader", "leader-name", leaderMember.Name)
 	return nil
 }
 
@@ -670,47 +337,6 @@ func (mgr *Manager) isRecoveryConfOutdated(leader string) bool {
 
 	masterHost := rowMap.GetString("Master_Host")
 	return !strings.HasPrefix(masterHost, leader)
-}
-
-func (mgr *Manager) GetHealthiestMember(*dcs.Cluster, string) *dcs.Member {
-	return nil
-}
-
-func (mgr *Manager) HasOtherHealthyLeader(ctx context.Context, cluster *dcs.Cluster) *dcs.Member {
-	isLeader, err := mgr.IsLeader(ctx, cluster)
-	if err == nil && isLeader {
-		// if current member is leader, just return
-		return nil
-	}
-
-	for _, member := range cluster.Members {
-		if member.Name == mgr.CurrentMemberName {
-			continue
-		}
-
-		isLeader, err := mgr.IsLeaderMember(ctx, cluster, &member)
-		if err == nil && isLeader {
-			return &member
-		}
-	}
-
-	return nil
-}
-
-// HasOtherHealthyMembers checks if there are any healthy members, excluding the leader
-func (mgr *Manager) HasOtherHealthyMembers(ctx context.Context, cluster *dcs.Cluster, leader string) []*dcs.Member {
-	members := make([]*dcs.Member, 0)
-	for _, member := range cluster.Members {
-		if member.Name == leader {
-			continue
-		}
-		if !mgr.IsMemberHealthy(ctx, cluster, &member) {
-			continue
-		}
-		members = append(members, &member)
-	}
-
-	return members
 }
 
 func (mgr *Manager) IsRootCreated(context.Context) (bool, error) {

@@ -26,23 +26,8 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
 
-	"github.com/apecloud/dbctl/dcs"
 	mysqlengine "github.com/apecloud/dbctl/engines/mysql"
 )
-
-// GetDBConnWithMember retrieves a database connection for a specific member of a cluster.
-func (mgr *Manager) GetDBConnWithMember(cluster *dcs.Cluster, member *dcs.Member) (db *sql.DB, err error) {
-	if member != nil && member.Name != mgr.CurrentMemberName {
-		addr := cluster.GetMemberAddrWithPort(*member)
-		db, err = config.GetDBConnWithAddr(addr)
-		if err != nil {
-			return nil, errors.Wrap(err, "new db connection failed")
-		}
-	} else {
-		db = mgr.DB
-	}
-	return db, nil
-}
 
 func (mgr *Manager) GetMySQLDBConn() (*sql.DB, error) {
 	mysqlConfig, err := mysql.ParseDSN(config.URL)

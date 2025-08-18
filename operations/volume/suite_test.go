@@ -31,7 +31,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/apecloud/dbctl/constant"
-	"github.com/apecloud/dbctl/dcs"
 	"github.com/apecloud/dbctl/engines"
 	"github.com/apecloud/dbctl/engines/register"
 )
@@ -39,8 +38,6 @@ import (
 var (
 	dbManager     engines.DBManager
 	mockDBManager *engines.MockDBManager
-	dcsStore      dcs.DCS
-	mockDCSStore  *dcs.MockDCS
 )
 
 func init() {
@@ -59,9 +56,6 @@ func TestVolumeOperations(t *testing.T) {
 var _ = BeforeSuite(func() {
 	// Init mock db manager
 	InitMockDBManager()
-
-	// Init mock dcs store
-	InitMockDCSStore()
 })
 
 var _ = AfterSuite(func() {
@@ -72,12 +66,4 @@ func InitMockDBManager() {
 	mockDBManager = engines.NewMockDBManager(ctrl)
 	register.SetDBManager(mockDBManager)
 	dbManager = mockDBManager
-}
-
-func InitMockDCSStore() {
-	ctrl := gomock.NewController(GinkgoT())
-	mockDCSStore = dcs.NewMockDCS(ctrl)
-	mockDCSStore.EXPECT().GetClusterFromCache().Return(&dcs.Cluster{}).AnyTimes()
-	dcs.SetStore(mockDCSStore)
-	dcsStore = mockDCSStore
 }

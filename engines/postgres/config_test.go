@@ -26,7 +26,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/apecloud/dbctl/constant"
-	"github.com/apecloud/dbctl/dcs"
 )
 
 func TestGetPostgresqlMetadata(t *testing.T) {
@@ -73,33 +72,5 @@ func TestGetPostgresqlMetadata(t *testing.T) {
 
 		assert.Equal(t, metadata.Username, "test")
 		assert.Equal(t, metadata.Password, "test_pwd")
-	})
-}
-
-func TestConfigFunc(t *testing.T) {
-	properties := map[string]string{
-		ConnectionURLKey: "user=postgres password=docker host=localhost port=5432 dbname=postgres pool_min_conns=1 pool_max_conns=10",
-	}
-	metadata, err := NewConfig(properties)
-	assert.NotNil(t, metadata)
-	assert.Nil(t, err)
-
-	t.Run("get db port", func(t *testing.T) {
-		port := metadata.GetDBPort()
-		assert.Equal(t, port, 5432)
-
-		metadata.Port = 0
-		port = metadata.GetDBPort()
-		assert.Equal(t, port, 5432)
-	})
-
-	t.Run("get consensus IP port", func(t *testing.T) {
-		cluster := &dcs.Cluster{
-			ClusterCompName: "test",
-			Namespace:       "default",
-		}
-
-		consensusIPPort := metadata.GetConsensusIPPort(cluster, "test")
-		assert.Equal(t, consensusIPPort, "test.test-headless.default.svc:15432")
 	})
 }

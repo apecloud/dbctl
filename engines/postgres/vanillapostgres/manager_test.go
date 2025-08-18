@@ -20,8 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package vanillapostgres
 
 import (
-	"context"
-	"fmt"
 	"testing"
 
 	"github.com/pashagolub/pgxmock/v2"
@@ -29,7 +27,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/apecloud/dbctl/constant"
-	"github.com/apecloud/dbctl/dcs"
 	"github.com/apecloud/dbctl/engines/postgres"
 )
 
@@ -59,75 +56,4 @@ func MockDatabase(t *testing.T) (*Manager, pgxmock.PgxPoolIface, error) {
 	manager.Pool = mock
 
 	return manager, mock, err
-}
-
-func TestIsLeader(t *testing.T) {
-	ctx := context.TODO()
-	manager, mock, _ := MockDatabase(t)
-	defer mock.Close()
-
-	t.Run("get member role primary", func(t *testing.T) {
-		mock.ExpectQuery("select").
-			WillReturnRows(pgxmock.NewRows([]string{"pg_is_in_recovery"}).AddRow(false))
-
-		isLeader, err := manager.IsLeader(ctx, nil)
-		assert.Nil(t, err)
-		assert.Equal(t, true, isLeader)
-	})
-
-	t.Run("get member role secondary", func(t *testing.T) {
-		mock.ExpectQuery("select").
-			WillReturnRows(pgxmock.NewRows([]string{"pg_is_in_recovery"}).AddRow(true))
-
-		isLeader, err := manager.IsLeader(ctx, nil)
-		assert.Nil(t, err)
-		assert.Equal(t, false, isLeader)
-	})
-
-	t.Run("query failed", func(t *testing.T) {
-		mock.ExpectQuery("select").
-			WillReturnError(fmt.Errorf("some error"))
-
-		isLeader, err := manager.IsLeader(ctx, nil)
-		assert.NotNil(t, err)
-		assert.Equal(t, false, isLeader)
-	})
-
-	t.Run("parse query failed", func(t *testing.T) {
-		mock.ExpectQuery("select").
-			WillReturnRows(pgxmock.NewRows([]string{"pg_is_in_recovery"}))
-		isLeader, err := manager.IsLeader(ctx, nil)
-		assert.NotNil(t, err)
-		assert.Equal(t, false, isLeader)
-	})
-
-	t.Run("has set isLeader", func(t *testing.T) {
-		manager.SetIsLeader(true)
-		isLeader, err := manager.IsLeader(ctx, nil)
-		assert.Nil(t, err)
-		assert.Equal(t, true, isLeader)
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
-}
-
-func TestHasOtherHealthyMembers(t *testing.T) {
-	ctx := context.TODO()
-	manager, mock, _ := MockDatabase(t)
-	defer mock.Close()
-	cluster := &dcs.Cluster{}
-	cluster.Members = append(cluster.Members, dcs.Member{
-		Name: manager.CurrentMemberName,
-	})
-
-	t.Run("", func(t *testing.T) {
-		members := manager.HasOtherHealthyMembers(ctx, cluster, manager.CurrentMemberName)
-		assert.Equal(t, 0, len(members))
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
 }

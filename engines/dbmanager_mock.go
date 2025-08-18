@@ -29,8 +29,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	dcs "github.com/apecloud/dbctl/dcs"
 	models "github.com/apecloud/dbctl/engines/models"
+	"github.com/apecloud/kubeblocks/pkg/lorry/dcs"
 	logr "github.com/go-logr/logr"
 	gomock "github.com/golang/mock/gomock"
 )
@@ -84,20 +84,6 @@ func (m *MockDBManager) CreateUser(arg0 context.Context, arg1, arg2 string) erro
 func (mr *MockDBManagerMockRecorder) CreateUser(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockDBManager)(nil).CreateUser), arg0, arg1, arg2)
-}
-
-// CurrentMemberHealthyCheck mocks base method.
-func (m *MockDBManager) CurrentMemberHealthyCheck(arg0 context.Context, arg1 *dcs.Cluster) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CurrentMemberHealthyCheck", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CurrentMemberHealthyCheck indicates an expected call of CurrentMemberHealthyCheck.
-func (mr *MockDBManagerMockRecorder) CurrentMemberHealthyCheck(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CurrentMemberHealthyCheck", reflect.TypeOf((*MockDBManager)(nil).CurrentMemberHealthyCheck), arg0, arg1)
 }
 
 // DeleteUser mocks base method.
@@ -158,19 +144,6 @@ func (mr *MockDBManagerMockRecorder) Exec(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockDBManager)(nil).Exec), arg0, arg1)
 }
 
-// Follow mocks base method.
-func (m *MockDBManager) Follow(arg0 context.Context, arg1 *dcs.Cluster) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Follow", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Follow indicates an expected call of Follow.
-func (mr *MockDBManagerMockRecorder) Follow(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Follow", reflect.TypeOf((*MockDBManager)(nil).Follow), arg0, arg1)
-}
 
 // GetCurrentMemberName mocks base method.
 func (m *MockDBManager) GetCurrentMemberName() string {
@@ -186,34 +159,7 @@ func (mr *MockDBManagerMockRecorder) GetCurrentMemberName() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentMemberName", reflect.TypeOf((*MockDBManager)(nil).GetCurrentMemberName))
 }
 
-// GetDBState mocks base method.
-func (m *MockDBManager) GetDBState(arg0 context.Context, arg1 *dcs.Cluster) *dcs.DBState {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetDBState", arg0, arg1)
-	ret0, _ := ret[0].(*dcs.DBState)
-	return ret0
-}
 
-// GetDBState indicates an expected call of GetDBState.
-func (mr *MockDBManagerMockRecorder) GetDBState(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDBState", reflect.TypeOf((*MockDBManager)(nil).GetDBState), arg0, arg1)
-}
-
-// GetLag mocks base method.
-func (m *MockDBManager) GetLag(arg0 context.Context, arg1 *dcs.Cluster) (int64, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetLag", arg0, arg1)
-	ret0, _ := ret[0].(int64)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetLag indicates an expected call of GetLag.
-func (mr *MockDBManagerMockRecorder) GetLag(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLag", reflect.TypeOf((*MockDBManager)(nil).GetLag), arg0, arg1)
-}
 
 // GetLogger mocks base method.
 func (m *MockDBManager) GetLogger() logr.Logger {
@@ -229,19 +175,6 @@ func (mr *MockDBManagerMockRecorder) GetLogger() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLogger", reflect.TypeOf((*MockDBManager)(nil).GetLogger))
 }
 
-// GetMemberAddrs mocks base method.
-func (m *MockDBManager) GetMemberAddrs(arg0 context.Context, arg1 *dcs.Cluster) []string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetMemberAddrs", arg0, arg1)
-	ret0, _ := ret[0].([]string)
-	return ret0
-}
-
-// GetMemberAddrs indicates an expected call of GetMemberAddrs.
-func (mr *MockDBManagerMockRecorder) GetMemberAddrs(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMemberAddrs", reflect.TypeOf((*MockDBManager)(nil).GetMemberAddrs), arg0, arg1)
-}
 
 // GetPort mocks base method.
 func (m *MockDBManager) GetPort() (int, error) {

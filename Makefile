@@ -151,7 +151,7 @@ module: ## Run go mod tidy->verify against go modules.
 	$(GO) mod tidy -compat=1.21
 	$(GO) mod verify
 
-TEST_PACKAGES ?= ./engines/... ./httpserver/... ./operations/... ./dcs/...
+TEST_PACKAGES ?= ./engines/... ./httpserver/... ./operations/...
 
 OUTPUT_COVERAGE=-coverprofile cover.out
 .PHONY: test

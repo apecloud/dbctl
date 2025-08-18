@@ -29,7 +29,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/apecloud/dbctl/constant"
-	"github.com/apecloud/dbctl/dcs"
 	"github.com/apecloud/dbctl/engines"
 )
 
@@ -126,47 +125,6 @@ func TestPgIsReady(t *testing.T) {
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("there were unfulfilled expectations: %v", err)
 	}
-}
-
-func TestIsLeaderMember(t *testing.T) {
-	ctx := context.TODO()
-	manager, mock, _ := MockDatabase(t)
-	defer mock.Close()
-	cluster := &dcs.Cluster{}
-	currentMember := dcs.Member{
-		Name: manager.CurrentMemberName,
-	}
-
-	t.Run("member is nil", func(t *testing.T) {
-		isLeaderMember, err := manager.IsLeaderMember(ctx, cluster, nil)
-		assert.False(t, isLeaderMember)
-		assert.NotNil(t, err)
-	})
-
-	t.Run("leader member is nil", func(t *testing.T) {
-		isLeaderMember, err := manager.IsLeaderMember(ctx, cluster, &currentMember)
-		assert.False(t, isLeaderMember)
-		assert.NotNil(t, err)
-	})
-
-	cluster.Leader = &dcs.Leader{
-		Name: manager.CurrentMemberName,
-	}
-	cluster.Members = append(cluster.Members, currentMember)
-	t.Run("is leader member", func(t *testing.T) {
-		isLeaderMember, err := manager.IsLeaderMember(ctx, cluster, &currentMember)
-		assert.True(t, isLeaderMember)
-		assert.Nil(t, err)
-	})
-
-	member := &dcs.Member{
-		Name: "test",
-	}
-	t.Run("is not leader member", func(t *testing.T) {
-		isLeaderMember, err := manager.IsLeaderMember(ctx, cluster, member)
-		assert.False(t, isLeaderMember)
-		assert.Nil(t, err)
-	})
 }
 
 func TestPgReload(t *testing.T) {

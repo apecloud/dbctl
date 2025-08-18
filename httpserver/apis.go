@@ -138,7 +138,7 @@ func OperationWrapper(op operations.Operation) fasthttp.RequestHandler {
 		if resp == nil {
 			respond(reqCtx, withEmpty())
 		} else {
-			body, _ = json.Marshal(resp.Role)
+			body = []byte(resp.Role)
 			respond(reqCtx, withMetadata(resp.Metadata), withJSON(statusCode, body))
 		}
 	}

@@ -27,7 +27,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/apecloud/dbctl/constant"
-	"github.com/apecloud/dbctl/dcs"
 	"github.com/apecloud/dbctl/engines/models"
 )
 
@@ -40,7 +39,6 @@ type DBManagerBase struct {
 	Logger            logr.Logger
 	DBStartupReady    bool
 	IsLocked          bool
-	DBState           *dcs.DBState
 }
 
 func NewDBManagerBase(logger logr.Logger) (*DBManagerBase, error) {
@@ -83,102 +81,8 @@ func (mgr *DBManagerBase) IsPromoted(context.Context) bool {
 	return true
 }
 
-func (mgr *DBManagerBase) Promote(context.Context, *dcs.Cluster) error {
-	return models.ErrNotImplemented
-}
-
 func (mgr *DBManagerBase) Demote(context.Context) error {
 	return models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) Follow(context.Context, *dcs.Cluster) error {
-	return models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) Recover(context.Context, *dcs.Cluster) error {
-	return nil
-}
-
-func (mgr *DBManagerBase) IsLeader(ctx context.Context, cluster *dcs.Cluster) (bool, error) {
-	return false, models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) IsLeaderMember(context.Context, *dcs.Cluster, *dcs.Member) (bool, error) {
-	return false, models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) GetMemberAddrs(context.Context, *dcs.Cluster) []string {
-	return nil
-}
-
-func (mgr *DBManagerBase) InitializeCluster(context.Context, *dcs.Cluster) error {
-	return nil
-}
-
-func (mgr *DBManagerBase) IsClusterInitialized(context.Context, *dcs.Cluster) (bool, error) {
-	return true, nil
-}
-
-func (mgr *DBManagerBase) IsClusterHealthy(context.Context, *dcs.Cluster) bool {
-	return true
-}
-
-func (mgr *DBManagerBase) MemberHealthyCheck(context.Context, *dcs.Cluster, *dcs.Member) error {
-	return nil
-}
-
-func (mgr *DBManagerBase) LeaderHealthyCheck(context.Context, *dcs.Cluster) error {
-	return nil
-}
-
-func (mgr *DBManagerBase) CurrentMemberHealthyCheck(ctx context.Context, cluster *dcs.Cluster) error {
-	member := cluster.GetMemberWithName(mgr.CurrentMemberName)
-	return mgr.MemberHealthyCheck(ctx, cluster, member)
-}
-
-func (mgr *DBManagerBase) HasOtherHealthyLeader(context.Context, *dcs.Cluster) *dcs.Member {
-	return nil
-}
-
-func (mgr *DBManagerBase) HasOtherHealthyMembers(context.Context, *dcs.Cluster, string) []*dcs.Member {
-	return nil
-}
-
-func (mgr *DBManagerBase) IsMemberHealthy(context.Context, *dcs.Cluster, *dcs.Member) bool {
-	return false
-}
-
-func (mgr *DBManagerBase) IsCurrentMemberHealthy(context.Context, *dcs.Cluster) bool {
-	return true
-}
-
-func (mgr *DBManagerBase) IsCurrentMemberInCluster(context.Context, *dcs.Cluster) bool {
-	return true
-}
-
-func (mgr *DBManagerBase) JoinCurrentMemberToCluster(context.Context, *dcs.Cluster) error {
-	return nil
-}
-
-func (mgr *DBManagerBase) LeaveMemberFromCluster(context.Context, *dcs.Cluster, string) error {
-	return nil
-}
-
-func (mgr *DBManagerBase) IsMemberLagging(context.Context, *dcs.Cluster, *dcs.Member) (bool, int64) {
-	return false, 0
-}
-
-func (mgr *DBManagerBase) GetLag(context.Context, *dcs.Cluster) (int64, error) {
-	return 0, models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) GetDBState(context.Context, *dcs.Cluster) *dcs.DBState {
-	// mgr.DBState = DBState
-	return nil
-}
-
-func (mgr *DBManagerBase) MoveData(context.Context, *dcs.Cluster) error {
-	return nil
 }
 
 func (mgr *DBManagerBase) GetReplicaRole(context.Context) (string, error) {
@@ -239,10 +143,6 @@ func (mgr *DBManagerBase) Lock(context.Context, string) error {
 
 func (mgr *DBManagerBase) Unlock(context.Context) error {
 	return models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) Start(context.Context, *dcs.Cluster) error {
-	return nil
 }
 
 func (mgr *DBManagerBase) Stop() error {

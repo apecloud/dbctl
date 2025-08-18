@@ -31,7 +31,6 @@ import (
 	"github.com/spf13/cast"
 	"github.com/spf13/viper"
 
-	"github.com/apecloud/dbctl/dcs"
 	"github.com/apecloud/dbctl/engines"
 	"github.com/apecloud/dbctl/engines/models"
 	"github.com/apecloud/dbctl/engines/postgres"
@@ -55,15 +54,6 @@ func NewManager(properties engines.Properties) (engines.DBManager, error) {
 
 	Mgr.Manager = *baseManager.(*postgres.Manager)
 	return Mgr, nil
-}
-
-func (mgr *Manager) IsLeader(ctx context.Context, _ *dcs.Cluster) (bool, error) {
-	isSet, isLeader := mgr.GetIsLeader()
-	if isSet {
-		return isLeader, nil
-	}
-
-	return mgr.IsLeaderWithHost(ctx, "")
 }
 
 func (mgr *Manager) IsLeaderWithHost(ctx context.Context, host string) (bool, error) {
@@ -143,34 +133,4 @@ func (mgr *Manager) GetMemberRoleWithHost(ctx context.Context, host string) (str
 	} else {
 		return models.PRIMARY, nil
 	}
-}
-
-func (mgr *Manager) IsMemberHealthy(ctx context.Context, cluster *dcs.Cluster, member *dcs.Member) bool {
-	var host string
-	if member.Name != mgr.CurrentMemberName {
-		host = cluster.GetMemberAddr(*member)
-	}
-
-	if cluster.Leader != nil && cluster.Leader.Name == member.Name {
-		if !mgr.WriteCheck(ctx, host) {
-			return false
-		}
-	}
-	if !mgr.ReadCheck(ctx, host) {
-		return false
-	}
-
-	return true
-}
-
-func (mgr *Manager) HasOtherHealthyMembers(ctx context.Context, cluster *dcs.Cluster, leader string) []*dcs.Member {
-	members := make([]*dcs.Member, 0)
-
-	for i, m := range cluster.Members {
-		if m.Name != leader && mgr.IsMemberHealthy(ctx, cluster, &m) {
-			members = append(members, &cluster.Members[i])
-		}
-	}
-
-	return members
 }

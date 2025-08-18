@@ -29,7 +29,6 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/apecloud/dbctl/constant"
-	"github.com/apecloud/dbctl/dcs"
 	"github.com/apecloud/dbctl/engines/models"
 	"github.com/apecloud/dbctl/engines/register"
 )
@@ -56,8 +55,6 @@ dbctl mongodb createuser --username root --password password
 		}
 		viper.SetDefault(constant.KBEnvEngineType, commands[0])
 
-		// Initialize DCS (Distributed Control System)
-		_ = dcs.InitStore()
 		// Initialize DB Manager
 		err := register.InitDBManager(configDir, "")
 		if err != nil {

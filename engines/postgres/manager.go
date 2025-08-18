@@ -30,7 +30,6 @@ import (
 	"github.com/spf13/viper"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/apecloud/dbctl/dcs"
 	"github.com/apecloud/dbctl/engines"
 )
 
@@ -86,23 +85,6 @@ func (mgr *Manager) UnsetIsLeader() {
 // GetIsLeader returns whether the "isLeader" is set or not and whether current member is leader or not
 func (mgr *Manager) GetIsLeader() (bool, bool) {
 	return mgr.isLeader != 0, mgr.isLeader == 1
-}
-
-func (mgr *Manager) IsLeaderMember(ctx context.Context, cluster *dcs.Cluster, member *dcs.Member) (bool, error) {
-	if member == nil {
-		return false, errors.Errorf("member is nil, can't check is leader member or not")
-	}
-
-	leaderMember := cluster.GetLeaderMember()
-	if leaderMember == nil {
-		return false, errors.Errorf("leader member is nil, can't check is leader member or not")
-	}
-
-	if leaderMember.Name != member.Name {
-		return false, nil
-	}
-
-	return true, nil
 }
 
 func (mgr *Manager) ReadCheck(ctx context.Context, host string) bool {

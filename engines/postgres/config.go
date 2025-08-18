@@ -27,7 +27,6 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/apecloud/dbctl/constant"
-	"github.com/apecloud/dbctl/dcs"
 )
 
 const (
@@ -102,8 +101,4 @@ func (config *Config) GetDBPort() int {
 func (config *Config) GetConnectURLWithHost(host string) string {
 	return fmt.Sprintf("user=%s password=%s host=%s port=%d dbname=%s",
 		config.Username, config.Password, host, config.Port, config.Database)
-}
-
-func (config *Config) GetConsensusIPPort(cluster *dcs.Cluster, name string) string {
-	return fmt.Sprintf("%s.%s-headless.%s.svc:1%d", name, cluster.ClusterCompName, cluster.Namespace, config.GetDBPort())
 }

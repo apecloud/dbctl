@@ -17,8 +17,6 @@ package mysql
 
 import (
 	"database/sql"
-
-	"github.com/apecloud/dbctl/dcs"
 )
 
 var connectionPoolCache = make(map[string]*sql.DB)
@@ -35,19 +33,5 @@ func GetDBConnection(dsn string) (*sql.DB, error) {
 	}
 
 	connectionPoolCache[dsn] = db
-	return db, nil
-}
-
-func (mgr *Manager) GetMemberConnection(cluster *dcs.Cluster, member *dcs.Member) (db *sql.DB, err error) {
-	if member != nil && member.Name != mgr.CurrentMemberName {
-		addr := cluster.GetMemberAddrWithPort(*member)
-		db, err = config.GetDBConnWithAddr(addr)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		db = mgr.DB
-	}
-
 	return db, nil
 }

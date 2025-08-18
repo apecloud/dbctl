@@ -21,12 +21,13 @@ package postgres
 
 import (
 	"context"
-	"github.com/apecloud/dbctl/dcs"
-	"github.com/apecloud/dbctl/engines"
+
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
+
+	"github.com/apecloud/dbctl/engines"
 )
 
 var (
@@ -40,7 +41,6 @@ const (
 
 type PgBaseIFace interface {
 	GetMemberRoleWithHost(ctx context.Context, host string) (string, error)
-	IsMemberHealthy(ctx context.Context, cluster *dcs.Cluster, member *dcs.Member) bool
 	Query(ctx context.Context, sql string) (result []byte, err error)
 	Exec(ctx context.Context, sql string) (result int64, err error)
 }

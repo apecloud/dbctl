@@ -24,8 +24,6 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-
-	"github.com/apecloud/dbctl/dcs"
 )
 
 var semiSyncMaxTimeout int = 4294967295
@@ -117,22 +115,6 @@ func (mgr *Manager) GetSemiSyncSourceTimeout(ctx context.Context) (int, error) {
 		return 0, errors.Wrapf(err, "exec %s failed", sql)
 	}
 	return value, nil
-}
-
-func (mgr *Manager) SetSemiSyncSourceTimeout(ctx context.Context, cluster *dcs.Cluster, leader *dcs.Member) error {
-	db, err := mgr.GetMemberConnection(cluster, leader)
-	if err != nil {
-		mgr.Logger.Info("Get Member conn failed", "error", err.Error())
-		return err
-	}
-
-	plugin := mgr.GetSemiSyncSourcePlugin()
-	setSourceTimeout := fmt.Sprintf("SET GLOBAL %s_timeout = %d;", plugin, semiSyncMaxTimeout)
-	_, err = db.Exec(setSourceTimeout)
-	if err != nil {
-		return errors.Wrap(err, setSourceTimeout+" execute failed")
-	}
-	return nil
 }
 
 func (mgr *Manager) EnableSemiSyncReplica(ctx context.Context) error {
