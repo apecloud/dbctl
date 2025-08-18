@@ -59,7 +59,7 @@ dbctl mongodb createuser --username root --password password
 		// Initialize DCS (Distributed Control System)
 		_ = dcs.InitStore()
 		// Initialize DB Manager
-		err := register.InitDBManager(configDir)
+		err := register.InitDBManager(configDir, "")
 		if err != nil {
 			return errors.Wrap(err, "DB manager initialize failed")
 		}

@@ -118,24 +118,18 @@ func NewClusterCommands(typeName string) (engines.ClusterCommands, error) {
 	return newFunc(), nil
 }
 
-func InitDBManager(configDir string) error {
+func InitDBManager(configDir, engineType string) error {
 	if dbManager != nil {
 		return nil
+	}
+	if engineType == "" {
+		return errors.New("engine type not set")
 	}
 
 	ctrl.Log.Info("Initialize DB manager")
 	workloadType := viper.GetString(constant.KBEnvWorkloadType)
 	if workloadType == "" {
 		ctrl.Log.Info(constant.KBEnvWorkloadType + " ENV not set")
-	}
-
-	engineType := viper.GetString(constant.KBEnvEngineType)
-	if viper.IsSet(constant.KBEnvBuiltinHandler) && engineType == "" {
-		workloadType = ""
-		engineType = viper.GetString(constant.KBEnvBuiltinHandler)
-	}
-	if engineType == "" {
-		return errors.New("engine typpe not set")
 	}
 
 	err := GetAllComponent(configDir) // find all builtin config file and read

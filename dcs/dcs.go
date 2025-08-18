@@ -71,15 +71,16 @@ func SetStore(d DCS) {
 	dcs = d
 }
 
+// fixme: this is a temporary solution to avoid error log
 func GetStore() DCS {
-	return dcs
+	return &KubernetesStore{}
 }
 
 func InitStore() error {
-	store, err := NewKubernetesStore()
-	if err != nil {
-		return err
-	}
-	dcs = store
+	//store, err := NewKubernetesStore()
+	//if err != nil {
+	//	return err
+	//}
+	dcs = &KubernetesStore{}
 	return nil
 }

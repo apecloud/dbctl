@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2022-2024 ApeCloud Co., Ltd
+Copyright (C) 2022-2025 ApeCloud Co., Ltd
 
 This file is part of KubeBlocks project
 
@@ -20,22 +20,89 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package main
 
 import (
+	"flag"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
+	"github.com/pkg/errors"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"go.uber.org/automaxprocs/maxprocs"
+	"go.uber.org/zap"
+	"k8s.io/klog/v2"
+	ctrl "sigs.k8s.io/controller-runtime"
+	kzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	"github.com/apecloud/dbctl/ctl"
+	"github.com/apecloud/dbctl/engines/register"
+	"github.com/apecloud/dbctl/httpserver"
+	opsregister "github.com/apecloud/dbctl/operations/register"
 )
 
+var configDir string
+var disableDNSChecker bool
+var engineType string
+
 func init() {
-	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
 	viper.AutomaticEnv()
+	pflag.StringVar(&configDir, "config-path", "/config/lorry/components/", "Lorry default config directory for builtin type")
+	pflag.BoolVar(&disableDNSChecker, "disable-dns-checker", false, "disable dns checker, for test&dev")
+	pflag.StringVar(&engineType, "engine", "", "Database engine type, e.g., mysql, postgres, mongodb, etc.")
 }
 
 func main() {
 	// Set GOMAXPROCS
 	_, _ = maxprocs.Set()
 
-	ctl.Execute("", "")
+	// Initialize flags
+	opts := kzap.Options{
+		Development: true,
+	}
+	opts.BindFlags(flag.CommandLine)
+	klog.InitFlags(nil)
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.Parse()
+	err := viper.BindPFlags(pflag.CommandLine)
+	if err != nil {
+		panic(errors.Wrap(err, "fatal error viper bindPFlags"))
+	}
+
+	// Initialize logger
+	kopts := []kzap.Opts{kzap.UseFlagOptions(&opts)}
+	if strings.EqualFold("debug", viper.GetString("zap-log-level")) {
+		kopts = append(kopts, kzap.RawZapOpts(zap.AddCaller()))
+	}
+	ctrl.SetLogger(kzap.New(kopts...))
+
+	// Initialize DCS (Distributed Control System)
+	//err = dcs.InitStore()
+	//if err != nil {
+	//	panic(errors.Wrap(err, "DCS initialize failed"))
+	//}
+
+	// Initialize DB Manager
+	err = register.InitDBManager(configDir, engineType)
+	if err != nil {
+		panic(errors.Wrap(err, "DB manager initialize failed"))
+	}
+
+	// start HTTP Server
+	ops := opsregister.Operations()
+	httpServer := httpserver.NewServer(ops)
+	err = httpServer.StartNonBlocking()
+	if err != nil {
+		panic(errors.Wrap(err, "HTTP server initialize failed"))
+	}
+
+	//// start cron jobs
+	//jobManager, err := cronjobs.NewManager()
+	//if err != nil {
+	//	panic(errors.Wrap(err, "Cron jobs initialize failed"))
+	//}
+	//jobManager.Start()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, os.Interrupt)
+	<-stop
 }
