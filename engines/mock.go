@@ -46,24 +46,9 @@ func NewMockManager(properties Properties) (DBManager, error) {
 
 	return Mgr, nil
 }
-func (*MockManager) IsRunning() bool {
-	return true
-}
 
 func (*MockManager) IsDBStartupReady() bool {
 	return true
-}
-
-func (*MockManager) IsFirstMember() bool {
-	return true
-}
-
-func (*MockManager) IsRootCreated(context.Context) (bool, error) {
-	return false, fmt.Errorf("NotSupported")
-}
-
-func (*MockManager) CreateRoot(context.Context) error {
-	return fmt.Errorf("NotSupported")
 }
 
 func (*MockManager) Lock(context.Context, string) error {

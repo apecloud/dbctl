@@ -82,28 +82,6 @@ func NewManager(properties engines.Properties) (engines.DBManager, error) {
 	return mgr, nil
 }
 
-func (mgr *Manager) IsRunning() bool {
-	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
-	defer cancel()
-
-	// test if db is ready to connect or not
-	err := mgr.DB.PingContext(ctx)
-	if err != nil {
-		var driverErr *mysql.MySQLError
-		if errors.As(err, &driverErr) {
-			// Now the error number is accessible directly
-			if driverErr.Number == 1040 {
-				mgr.Logger.Info("connect failed: Too many connections")
-				return true
-			}
-		}
-		mgr.Logger.Info("DB is not ready", "error", err)
-		return false
-	}
-
-	return true
-}
-
 func (mgr *Manager) IsDBStartupReady() bool {
 	if mgr.DBStartupReady {
 		return true
@@ -337,14 +315,6 @@ func (mgr *Manager) isRecoveryConfOutdated(leader string) bool {
 
 	masterHost := rowMap.GetString("Master_Host")
 	return !strings.HasPrefix(masterHost, leader)
-}
-
-func (mgr *Manager) IsRootCreated(context.Context) (bool, error) {
-	return true, nil
-}
-
-func (mgr *Manager) CreateRoot(context.Context) error {
-	return nil
 }
 
 func (mgr *Manager) Lock(context.Context, string) error {

@@ -83,44 +83,6 @@ func TestNewManager(t *testing.T) {
 	})
 }
 
-func TestManager_IsRunning(t *testing.T) {
-	manager, mock, _ := mockDatabase(t)
-
-	t.Run("Too many connections", func(t *testing.T) {
-		mock.ExpectPing().
-			WillReturnError(&mysql.MySQLError{Number: 1040})
-
-		isRunning := manager.IsRunning()
-		assert.True(t, isRunning)
-	})
-
-	t.Run("DB is not ready", func(t *testing.T) {
-		mock.ExpectPing().
-			WillReturnError(fmt.Errorf("some error"))
-
-		isRunning := manager.IsRunning()
-		assert.False(t, isRunning)
-	})
-
-	t.Run("ping db overtime", func(t *testing.T) {
-		mock.ExpectPing().WillDelayFor(time.Second)
-
-		isRunning := manager.IsRunning()
-		assert.False(t, isRunning)
-	})
-
-	t.Run("db is running", func(t *testing.T) {
-		mock.ExpectPing()
-
-		isRunning := manager.IsRunning()
-		assert.True(t, isRunning)
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
-}
-
 func TestManager_IsDBStartupReady(t *testing.T) {
 	manager, mock, _ := mockDatabase(t)
 

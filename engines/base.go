@@ -21,7 +21,6 @@ package engines
 
 import (
 	"context"
-	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -73,14 +72,6 @@ func (mgr *DBManagerBase) GetCurrentMemberName() string {
 	return mgr.CurrentMemberName
 }
 
-func (mgr *DBManagerBase) IsFirstMember() bool {
-	return strings.HasSuffix(mgr.CurrentMemberName, "-0")
-}
-
-func (mgr *DBManagerBase) IsPromoted(context.Context) bool {
-	return true
-}
-
 func (mgr *DBManagerBase) Demote(context.Context) error {
 	return models.ErrNotImplemented
 }
@@ -99,10 +90,6 @@ func (mgr *DBManagerBase) Query(context.Context, string) ([]byte, error) {
 
 func (mgr *DBManagerBase) GetPort() (int, error) {
 	return 0, models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) IsRootCreated(context.Context) (bool, error) {
-	return true, nil
 }
 
 func (mgr *DBManagerBase) ListUsers(context.Context) ([]models.UserInfo, error) {
@@ -133,24 +120,12 @@ func (mgr *DBManagerBase) RevokeUserRole(context.Context, string, string) error 
 	return models.ErrNotImplemented
 }
 
-func (mgr *DBManagerBase) IsRunning() bool {
-	return false
-}
-
 func (mgr *DBManagerBase) Lock(context.Context, string) error {
 	return models.ErrNotImplemented
 }
 
 func (mgr *DBManagerBase) Unlock(context.Context) error {
 	return models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) Stop() error {
-	return nil
-}
-
-func (mgr *DBManagerBase) CreateRoot(context.Context) error {
-	return nil
 }
 
 func (mgr *DBManagerBase) ShutDownWithWait() {

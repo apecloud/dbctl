@@ -28,28 +28,11 @@ import (
 )
 
 type DBManager interface {
-	IsRunning() bool
-
 	IsDBStartupReady() bool
 
-	IsFirstMember() bool
 	GetReplicaRole(context.Context) (string, error)
 
-	// IsPromoted is applicable only to consensus cluster, which is used to
-	// check if DB has complete switchover.
-	// for replicationset cluster,  it will always be true.
-	IsPromoted(context.Context) bool
-
-	Stop() error
-
-	// GetHealthiestMember(*dcs.Cluster, string) *dcs.Member
-	// IsHealthiestMember(*dcs.Cluster) bool
-
 	GetCurrentMemberName() string
-
-	// Functions related to account manage
-	IsRootCreated(context.Context) (bool, error)
-	CreateRoot(context.Context) error
 
 	// Readonly lock for disk full
 	Lock(context.Context, string) error

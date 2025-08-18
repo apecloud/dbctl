@@ -75,12 +75,6 @@ func main() {
 	}
 	ctrl.SetLogger(kzap.New(kopts...))
 
-	// Initialize DCS (Distributed Control System)
-	//err = dcs.InitStore()
-	//if err != nil {
-	//	panic(errors.Wrap(err, "DCS initialize failed"))
-	//}
-
 	// Initialize DB Manager
 	err = register.InitDBManager(configDir, engineType)
 	if err != nil {
@@ -94,13 +88,6 @@ func main() {
 	if err != nil {
 		panic(errors.Wrap(err, "HTTP server initialize failed"))
 	}
-
-	//// start cron jobs
-	//jobManager, err := cronjobs.NewManager()
-	//if err != nil {
-	//	panic(errors.Wrap(err, "Cron jobs initialize failed"))
-	//}
-	//jobManager.Start()
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGTERM, os.Interrupt)

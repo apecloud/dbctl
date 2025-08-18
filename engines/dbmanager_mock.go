@@ -30,7 +30,6 @@ import (
 	reflect "reflect"
 
 	models "github.com/apecloud/dbctl/engines/models"
-	"github.com/apecloud/kubeblocks/pkg/lorry/dcs"
 	logr "github.com/go-logr/logr"
 	gomock "github.com/golang/mock/gomock"
 )
@@ -56,20 +55,6 @@ func NewMockDBManager(ctrl *gomock.Controller) *MockDBManager {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockDBManager) EXPECT() *MockDBManagerMockRecorder {
 	return m.recorder
-}
-
-// CreateRoot mocks base method.
-func (m *MockDBManager) CreateRoot(arg0 context.Context) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateRoot", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CreateRoot indicates an expected call of CreateRoot.
-func (mr *MockDBManagerMockRecorder) CreateRoot(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateRoot", reflect.TypeOf((*MockDBManager)(nil).CreateRoot), arg0)
 }
 
 // CreateUser mocks base method.
@@ -98,20 +83,6 @@ func (m *MockDBManager) DeleteUser(arg0 context.Context, arg1 string) error {
 func (mr *MockDBManagerMockRecorder) DeleteUser(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockDBManager)(nil).DeleteUser), arg0, arg1)
-}
-
-// Demote mocks base method.
-func (m *MockDBManager) Demote(arg0 context.Context) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Demote", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Demote indicates an expected call of Demote.
-func (mr *MockDBManagerMockRecorder) Demote(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Demote", reflect.TypeOf((*MockDBManager)(nil).Demote), arg0)
 }
 
 // DescribeUser mocks base method.
@@ -144,7 +115,6 @@ func (mr *MockDBManagerMockRecorder) Exec(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockDBManager)(nil).Exec), arg0, arg1)
 }
 
-
 // GetCurrentMemberName mocks base method.
 func (m *MockDBManager) GetCurrentMemberName() string {
 	m.ctrl.T.Helper()
@@ -159,8 +129,6 @@ func (mr *MockDBManagerMockRecorder) GetCurrentMemberName() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentMemberName", reflect.TypeOf((*MockDBManager)(nil).GetCurrentMemberName))
 }
 
-
-
 // GetLogger mocks base method.
 func (m *MockDBManager) GetLogger() logr.Logger {
 	m.ctrl.T.Helper()
@@ -174,7 +142,6 @@ func (mr *MockDBManagerMockRecorder) GetLogger() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLogger", reflect.TypeOf((*MockDBManager)(nil).GetLogger))
 }
-
 
 // GetPort mocks base method.
 func (m *MockDBManager) GetPort() (int, error) {
@@ -220,105 +187,6 @@ func (mr *MockDBManagerMockRecorder) GrantUserRole(arg0, arg1, arg2 interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GrantUserRole", reflect.TypeOf((*MockDBManager)(nil).GrantUserRole), arg0, arg1, arg2)
 }
 
-// HasOtherHealthyLeader mocks base method.
-func (m *MockDBManager) HasOtherHealthyLeader(arg0 context.Context, arg1 *dcs.Cluster) *dcs.Member {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HasOtherHealthyLeader", arg0, arg1)
-	ret0, _ := ret[0].(*dcs.Member)
-	return ret0
-}
-
-// HasOtherHealthyLeader indicates an expected call of HasOtherHealthyLeader.
-func (mr *MockDBManagerMockRecorder) HasOtherHealthyLeader(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasOtherHealthyLeader", reflect.TypeOf((*MockDBManager)(nil).HasOtherHealthyLeader), arg0, arg1)
-}
-
-// HasOtherHealthyMembers mocks base method.
-func (m *MockDBManager) HasOtherHealthyMembers(arg0 context.Context, arg1 *dcs.Cluster, arg2 string) []*dcs.Member {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HasOtherHealthyMembers", arg0, arg1, arg2)
-	ret0, _ := ret[0].([]*dcs.Member)
-	return ret0
-}
-
-// HasOtherHealthyMembers indicates an expected call of HasOtherHealthyMembers.
-func (mr *MockDBManagerMockRecorder) HasOtherHealthyMembers(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HasOtherHealthyMembers", reflect.TypeOf((*MockDBManager)(nil).HasOtherHealthyMembers), arg0, arg1, arg2)
-}
-
-// InitializeCluster mocks base method.
-func (m *MockDBManager) InitializeCluster(arg0 context.Context, arg1 *dcs.Cluster) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InitializeCluster", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// InitializeCluster indicates an expected call of InitializeCluster.
-func (mr *MockDBManagerMockRecorder) InitializeCluster(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitializeCluster", reflect.TypeOf((*MockDBManager)(nil).InitializeCluster), arg0, arg1)
-}
-
-// IsClusterHealthy mocks base method.
-func (m *MockDBManager) IsClusterHealthy(arg0 context.Context, arg1 *dcs.Cluster) bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsClusterHealthy", arg0, arg1)
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// IsClusterHealthy indicates an expected call of IsClusterHealthy.
-func (mr *MockDBManagerMockRecorder) IsClusterHealthy(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsClusterHealthy", reflect.TypeOf((*MockDBManager)(nil).IsClusterHealthy), arg0, arg1)
-}
-
-// IsClusterInitialized mocks base method.
-func (m *MockDBManager) IsClusterInitialized(arg0 context.Context, arg1 *dcs.Cluster) (bool, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsClusterInitialized", arg0, arg1)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// IsClusterInitialized indicates an expected call of IsClusterInitialized.
-func (mr *MockDBManagerMockRecorder) IsClusterInitialized(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsClusterInitialized", reflect.TypeOf((*MockDBManager)(nil).IsClusterInitialized), arg0, arg1)
-}
-
-// IsCurrentMemberHealthy mocks base method.
-func (m *MockDBManager) IsCurrentMemberHealthy(arg0 context.Context, arg1 *dcs.Cluster) bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsCurrentMemberHealthy", arg0, arg1)
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// IsCurrentMemberHealthy indicates an expected call of IsCurrentMemberHealthy.
-func (mr *MockDBManagerMockRecorder) IsCurrentMemberHealthy(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsCurrentMemberHealthy", reflect.TypeOf((*MockDBManager)(nil).IsCurrentMemberHealthy), arg0, arg1)
-}
-
-// IsCurrentMemberInCluster mocks base method.
-func (m *MockDBManager) IsCurrentMemberInCluster(arg0 context.Context, arg1 *dcs.Cluster) bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsCurrentMemberInCluster", arg0, arg1)
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// IsCurrentMemberInCluster indicates an expected call of IsCurrentMemberInCluster.
-func (mr *MockDBManagerMockRecorder) IsCurrentMemberInCluster(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsCurrentMemberInCluster", reflect.TypeOf((*MockDBManager)(nil).IsCurrentMemberInCluster), arg0, arg1)
-}
-
 // IsDBStartupReady mocks base method.
 func (m *MockDBManager) IsDBStartupReady() bool {
 	m.ctrl.T.Helper()
@@ -331,164 +199,6 @@ func (m *MockDBManager) IsDBStartupReady() bool {
 func (mr *MockDBManagerMockRecorder) IsDBStartupReady() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsDBStartupReady", reflect.TypeOf((*MockDBManager)(nil).IsDBStartupReady))
-}
-
-// IsFirstMember mocks base method.
-func (m *MockDBManager) IsFirstMember() bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsFirstMember")
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// IsFirstMember indicates an expected call of IsFirstMember.
-func (mr *MockDBManagerMockRecorder) IsFirstMember() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsFirstMember", reflect.TypeOf((*MockDBManager)(nil).IsFirstMember))
-}
-
-// IsLeader mocks base method.
-func (m *MockDBManager) IsLeader(arg0 context.Context, arg1 *dcs.Cluster) (bool, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsLeader", arg0, arg1)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// IsLeader indicates an expected call of IsLeader.
-func (mr *MockDBManagerMockRecorder) IsLeader(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsLeader", reflect.TypeOf((*MockDBManager)(nil).IsLeader), arg0, arg1)
-}
-
-// IsLeaderMember mocks base method.
-func (m *MockDBManager) IsLeaderMember(arg0 context.Context, arg1 *dcs.Cluster, arg2 *dcs.Member) (bool, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsLeaderMember", arg0, arg1, arg2)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// IsLeaderMember indicates an expected call of IsLeaderMember.
-func (mr *MockDBManagerMockRecorder) IsLeaderMember(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsLeaderMember", reflect.TypeOf((*MockDBManager)(nil).IsLeaderMember), arg0, arg1, arg2)
-}
-
-// IsMemberHealthy mocks base method.
-func (m *MockDBManager) IsMemberHealthy(arg0 context.Context, arg1 *dcs.Cluster, arg2 *dcs.Member) bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsMemberHealthy", arg0, arg1, arg2)
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// IsMemberHealthy indicates an expected call of IsMemberHealthy.
-func (mr *MockDBManagerMockRecorder) IsMemberHealthy(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsMemberHealthy", reflect.TypeOf((*MockDBManager)(nil).IsMemberHealthy), arg0, arg1, arg2)
-}
-
-// IsMemberLagging mocks base method.
-func (m *MockDBManager) IsMemberLagging(arg0 context.Context, arg1 *dcs.Cluster, arg2 *dcs.Member) (bool, int64) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsMemberLagging", arg0, arg1, arg2)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(int64)
-	return ret0, ret1
-}
-
-// IsMemberLagging indicates an expected call of IsMemberLagging.
-func (mr *MockDBManagerMockRecorder) IsMemberLagging(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsMemberLagging", reflect.TypeOf((*MockDBManager)(nil).IsMemberLagging), arg0, arg1, arg2)
-}
-
-// IsPromoted mocks base method.
-func (m *MockDBManager) IsPromoted(arg0 context.Context) bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsPromoted", arg0)
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// IsPromoted indicates an expected call of IsPromoted.
-func (mr *MockDBManagerMockRecorder) IsPromoted(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsPromoted", reflect.TypeOf((*MockDBManager)(nil).IsPromoted), arg0)
-}
-
-// IsRootCreated mocks base method.
-func (m *MockDBManager) IsRootCreated(arg0 context.Context) (bool, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsRootCreated", arg0)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// IsRootCreated indicates an expected call of IsRootCreated.
-func (mr *MockDBManagerMockRecorder) IsRootCreated(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsRootCreated", reflect.TypeOf((*MockDBManager)(nil).IsRootCreated), arg0)
-}
-
-// IsRunning mocks base method.
-func (m *MockDBManager) IsRunning() bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsRunning")
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// IsRunning indicates an expected call of IsRunning.
-func (mr *MockDBManagerMockRecorder) IsRunning() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsRunning", reflect.TypeOf((*MockDBManager)(nil).IsRunning))
-}
-
-// JoinCurrentMemberToCluster mocks base method.
-func (m *MockDBManager) JoinCurrentMemberToCluster(arg0 context.Context, arg1 *dcs.Cluster) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "JoinCurrentMemberToCluster", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// JoinCurrentMemberToCluster indicates an expected call of JoinCurrentMemberToCluster.
-func (mr *MockDBManagerMockRecorder) JoinCurrentMemberToCluster(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "JoinCurrentMemberToCluster", reflect.TypeOf((*MockDBManager)(nil).JoinCurrentMemberToCluster), arg0, arg1)
-}
-
-// LeaderHealthyCheck mocks base method.
-func (m *MockDBManager) LeaderHealthyCheck(arg0 context.Context, arg1 *dcs.Cluster) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "LeaderHealthyCheck", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// LeaderHealthyCheck indicates an expected call of LeaderHealthyCheck.
-func (mr *MockDBManagerMockRecorder) LeaderHealthyCheck(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LeaderHealthyCheck", reflect.TypeOf((*MockDBManager)(nil).LeaderHealthyCheck), arg0, arg1)
-}
-
-// LeaveMemberFromCluster mocks base method.
-func (m *MockDBManager) LeaveMemberFromCluster(arg0 context.Context, arg1 *dcs.Cluster, arg2 string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "LeaveMemberFromCluster", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// LeaveMemberFromCluster indicates an expected call of LeaveMemberFromCluster.
-func (mr *MockDBManagerMockRecorder) LeaveMemberFromCluster(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LeaveMemberFromCluster", reflect.TypeOf((*MockDBManager)(nil).LeaveMemberFromCluster), arg0, arg1, arg2)
 }
 
 // ListSystemAccounts mocks base method.
@@ -535,48 +245,6 @@ func (mr *MockDBManagerMockRecorder) Lock(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Lock", reflect.TypeOf((*MockDBManager)(nil).Lock), arg0, arg1)
 }
 
-// MemberHealthyCheck mocks base method.
-func (m *MockDBManager) MemberHealthyCheck(arg0 context.Context, arg1 *dcs.Cluster, arg2 *dcs.Member) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "MemberHealthyCheck", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// MemberHealthyCheck indicates an expected call of MemberHealthyCheck.
-func (mr *MockDBManagerMockRecorder) MemberHealthyCheck(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MemberHealthyCheck", reflect.TypeOf((*MockDBManager)(nil).MemberHealthyCheck), arg0, arg1, arg2)
-}
-
-// MoveData mocks base method.
-func (m *MockDBManager) MoveData(arg0 context.Context, arg1 *dcs.Cluster) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "MoveData", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// MoveData indicates an expected call of MoveData.
-func (mr *MockDBManagerMockRecorder) MoveData(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MoveData", reflect.TypeOf((*MockDBManager)(nil).MoveData), arg0, arg1)
-}
-
-// Promote mocks base method.
-func (m *MockDBManager) Promote(arg0 context.Context, arg1 *dcs.Cluster) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Promote", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Promote indicates an expected call of Promote.
-func (mr *MockDBManagerMockRecorder) Promote(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Promote", reflect.TypeOf((*MockDBManager)(nil).Promote), arg0, arg1)
-}
-
 // Query mocks base method.
 func (m *MockDBManager) Query(arg0 context.Context, arg1 string) ([]byte, error) {
 	m.ctrl.T.Helper()
@@ -590,20 +258,6 @@ func (m *MockDBManager) Query(arg0 context.Context, arg1 string) ([]byte, error)
 func (mr *MockDBManagerMockRecorder) Query(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Query", reflect.TypeOf((*MockDBManager)(nil).Query), arg0, arg1)
-}
-
-// Recover mocks base method.
-func (m *MockDBManager) Recover(arg0 context.Context, arg1 *dcs.Cluster) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Recover", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Recover indicates an expected call of Recover.
-func (mr *MockDBManagerMockRecorder) Recover(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Recover", reflect.TypeOf((*MockDBManager)(nil).Recover), arg0, arg1)
 }
 
 // RevokeUserRole mocks base method.
@@ -630,34 +284,6 @@ func (m *MockDBManager) ShutDownWithWait() {
 func (mr *MockDBManagerMockRecorder) ShutDownWithWait() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ShutDownWithWait", reflect.TypeOf((*MockDBManager)(nil).ShutDownWithWait))
-}
-
-// Start mocks base method.
-func (m *MockDBManager) Start(arg0 context.Context, arg1 *dcs.Cluster) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Start", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Start indicates an expected call of Start.
-func (mr *MockDBManagerMockRecorder) Start(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Start", reflect.TypeOf((*MockDBManager)(nil).Start), arg0, arg1)
-}
-
-// Stop mocks base method.
-func (m *MockDBManager) Stop() error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Stop")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Stop indicates an expected call of Stop.
-func (mr *MockDBManagerMockRecorder) Stop() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Stop", reflect.TypeOf((*MockDBManager)(nil).Stop))
 }
 
 // Unlock mocks base method.
