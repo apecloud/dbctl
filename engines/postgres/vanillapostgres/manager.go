@@ -94,10 +94,7 @@ func (mgr *Manager) IsDBStartupReady() bool {
 
 func (mgr *Manager) GetMemberRoleWithHost(ctx context.Context, host string) (string, error) {
 	getRoleFromPatroni := func() (string, error) {
-		patroniPort := "8008"
-		if viper.IsSet("PATRONI_PORT") {
-			patroniPort = viper.GetString("PATRONI_PORT")
-		}
+		patroniPort := viper.GetString("PATRONI_PORT")
 
 		resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%s", patroniPort))
 		if err != nil {
@@ -123,7 +120,7 @@ func (mgr *Manager) GetMemberRoleWithHost(ctx context.Context, host string) (str
 		}
 	}
 
-	if viper.IsSet("PATRONIVERSION") {
+	if viper.IsSet("PATRONI_PORT") {
 		return getRoleFromPatroni()
 	}
 
