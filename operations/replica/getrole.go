@@ -28,6 +28,7 @@ import (
 	"github.com/apecloud/dbctl/engines"
 	"github.com/apecloud/dbctl/engines/register"
 	"github.com/apecloud/dbctl/operations"
+	"github.com/apecloud/dbctl/util"
 )
 
 type GetRole struct {
@@ -44,7 +45,7 @@ func init() {
 	}
 }
 
-func (s *GetRole) Init(ctx context.Context) error {
+func (s *GetRole) Init(context.Context) error {
 	s.Logger = ctrl.Log.WithName("getrole")
 	dbManager, err := register.GetDBManager()
 	if err != nil {
@@ -63,7 +64,7 @@ func (s *GetRole) Do(ctx context.Context, req *operations.OpsRequest) (*operatio
 	resp := &operations.OpsResponse{
 		Data: map[string]any{},
 	}
-	//resp.Data["operation"] = util.GetRoleOperation
+	resp.Data["operation"] = util.GetRoleOperation
 
 	role, err := s.DBManager.GetReplicaRole(ctx)
 	if err != nil {

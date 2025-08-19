@@ -37,7 +37,7 @@ var config Config
 var logger = ctrl.Log.WithName("HTTPServer")
 
 func InitFlags(fs *pflag.FlagSet) {
-	fs.IntVar(&config.Port, "port", 5001, "The HTTP Server listen port for Lorry service.")
-	fs.StringVar(&config.Address, "address", "0.0.0.0", "The HTTP Server listen address for Lorry service.")
-	fs.BoolVar(&config.APILogging, "api-logging", true, "Enable api logging for Lorry request.")
+	fs.IntVar(&config.Port, "port", 5001, "The HTTP Server listen port for dbctl service.")
+	fs.StringVar(&config.Address, "address", "0.0.0.0", "The HTTP Server listen address for dbctl service.")
+	fs.BoolVar(&config.APILogging, "api-logging", true, "Enable api logging for dbctl request.")
 }

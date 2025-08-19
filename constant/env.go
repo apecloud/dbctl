@@ -25,7 +25,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Lorry
 const (
 	KBEnvServiceUser     = "KB_SERVICE_USER"
 	KBEnvServicePassword = "KB_SERVICE_PASSWORD"

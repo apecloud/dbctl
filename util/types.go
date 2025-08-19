@@ -25,14 +25,15 @@ const (
 	RespFieldEvent   = "event"
 	RespFieldMessage = "message"
 
-	ExecOperation  OperationKind = "exec"
-	QueryOperation OperationKind = "query"
+	ExecOperation    OperationKind = "exec"
+	QueryOperation   OperationKind = "query"
+	GetRoleOperation OperationKind = "getRole"
 
 	OperationSuccess = "Success"
 	OperationFailed  = "Failed"
 )
 
-// ProbeError is the error for Lorry probe api, it implements error interface
+// ProbeError is the error for dbctl probe api, it implements error interface
 type ProbeError struct {
 	message string
 }

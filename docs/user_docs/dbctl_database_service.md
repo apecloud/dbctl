@@ -19,10 +19,10 @@ dbctl service
 ### Options
 
 ```
-      --address string   The HTTP Server listen address for Lorry service. (default "0.0.0.0")
-      --api-logging      Enable api logging for Lorry request. (default true)
+      --address string   The HTTP Server listen address for dbctl service. (default "0.0.0.0")
+      --api-logging      Enable api logging for dbctl request. (default true)
   -h, --help             Print this help message
-      --port int         The HTTP Server listen port for Lorry service. (default 5001)
+      --port int         The HTTP Server listen port for dbctl service. (default 5001)
 ```
 
 ### Options inherited from parent commands

@@ -49,7 +49,7 @@ type ManagerNewFunc func() (engines.DBManager, error)
 
 var managerNewFunctions = make(map[string]ManagerNewFunc)
 
-// Lorry runs with a single database engine instance at a time,
+// dbctl runs with a single database engine instance at a time,
 // so only one dbManager is initialized and cached here during execution.
 var dbManager engines.DBManager
 var fs = afero.NewOsFs()
