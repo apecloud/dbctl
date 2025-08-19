@@ -21,9 +21,7 @@ package postgres
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
 	"github.com/shirou/gopsutil/v3/process"
@@ -68,59 +66,6 @@ func NewManager() (engines.DBManager, error) {
 	}
 
 	return mgr, nil
-}
-
-func (mgr *Manager) SetIsLeader(isLeader bool) {
-	if isLeader {
-		mgr.isLeader = 1
-	} else {
-		mgr.isLeader = -1
-	}
-}
-
-func (mgr *Manager) UnsetIsLeader() {
-	mgr.isLeader = 0
-}
-
-// GetIsLeader returns whether the "isLeader" is set or not and whether current member is leader or not
-func (mgr *Manager) GetIsLeader() (bool, bool) {
-	return mgr.isLeader != 0, mgr.isLeader == 1
-}
-
-func (mgr *Manager) ReadCheck(ctx context.Context, host string) bool {
-	readSQL := fmt.Sprintf(`select check_ts from kb_health_check where type=%d limit 1;`, engines.CheckStatusType)
-	_, err := mgr.QueryWithHost(ctx, readSQL, host)
-	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == "42P01" {
-			// no healthy check records, return true
-			return true
-		}
-		mgr.Logger.Error(err, "read check failed")
-		return false
-	}
-	return true
-}
-
-func (mgr *Manager) WriteCheck(ctx context.Context, host string) bool {
-	writeSQL := fmt.Sprintf(`
-		create table if not exists kb_health_check(type int, check_ts timestamp, primary key(type));
-		insert into kb_health_check values(%d, CURRENT_TIMESTAMP) on conflict(type) do update set check_ts = CURRENT_TIMESTAMP;
-		`, engines.CheckStatusType)
-	_, err := mgr.ExecWithHost(ctx, writeSQL, host)
-	if err != nil {
-		mgr.Logger.Error(err, "write check failed")
-		return false
-	}
-	return true
-}
-
-func (mgr *Manager) PgReload(ctx context.Context) error {
-	reload := "select pg_reload_conf();"
-
-	_, err := mgr.Exec(ctx, reload)
-
-	return err
 }
 
 func (mgr *Manager) IsPgReady(ctx context.Context) bool {

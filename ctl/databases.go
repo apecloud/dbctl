@@ -33,8 +33,6 @@ import (
 	"github.com/apecloud/dbctl/engines/register"
 )
 
-const ()
-
 var DatabaseCmd = &cobra.Command{
 	Use:     "database",
 	Aliases: models.GetEngineTypeListStr(),

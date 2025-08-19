@@ -56,16 +56,6 @@ func NewManager() (engines.DBManager, error) {
 	return Mgr, nil
 }
 
-func (mgr *Manager) IsLeaderWithHost(ctx context.Context, host string) (bool, error) {
-	role, err := mgr.GetMemberRoleWithHost(ctx, host)
-	if err != nil {
-		return false, errors.Errorf("check is leader with host:%s failed, err:%v", host, err)
-	}
-
-	mgr.Logger.Info(fmt.Sprintf("get member:%s role:%s", host, role))
-	return role == models.PRIMARY, nil
-}
-
 func (mgr *Manager) IsDBStartupReady() bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()

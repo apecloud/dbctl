@@ -32,7 +32,9 @@ dbctl mongodb createuser --username root --password password
 
 ```
       --add_dir_header                    If true, adds the file directory to the header of the log messages
+      --address string                    The HTTP Server listen address for Lorry service. (default "0.0.0.0")
       --alsologtostderr                   log to standard error as well as files (no effect when -logtostderr=true)
+      --api-logging                       Enable api logging for Lorry request. (default true)
       --config-path string                dbctl default config directory for builtin type (default "/tools/config/dbctl/components/")
       --disable-dns-checker               disable dns checker, for test&dev
       --kubeconfig string                 Paths to a kubeconfig. Only required if out-of-cluster.
@@ -42,6 +44,7 @@ dbctl mongodb createuser --username root --password password
       --log_file_max_size uint            Defines the maximum size a log file can grow to (no effect when -logtostderr=true). Unit is megabytes. If the value is 0, the maximum file size is unlimited. (default 1800)
       --logtostderr                       log to standard error instead of files (default true)
       --one_output                        If true, only write logs to their native severity level (vs also writing to each lower severity level; no effect when -logtostderr=true)
+      --port int                          The HTTP Server listen port for Lorry service. (default 5001)
       --skip_headers                      If true, avoid header prefixes in the log messages
       --skip_log_headers                  If true, avoid headers when opening log files (no effect when -logtostderr=true)
       --stderrthreshold severity          logs at or above this threshold go to stderr when writing to files and stderr (no effect when -logtostderr=true or -alsologtostderr=true) (default 2)
@@ -58,18 +61,7 @@ dbctl mongodb createuser --username root --password password
 ### SEE ALSO
 
 
-* [dbctl database createuser](dbctl_database_createuser.md)	 - create user.
-* [dbctl database deleteuser](dbctl_database_deleteuser.md)	 - delete user.
-* [dbctl database describeuser](dbctl_database_describeuser.md)	 - describe user.
 * [dbctl database getrole](dbctl_database_getrole.md)	 - get role of the replica.
-* [dbctl database grant-role](dbctl_database_grant-role.md)	 - grant user role.
-* [dbctl database joinmember](dbctl_database_joinmember.md)	 - execute a join member request.
-* [dbctl database leavemember](dbctl_database_leavemember.md)	 - execute a leave member request.
-* [dbctl database listsystemaccounts](dbctl_database_listsystemaccounts.md)	 - list system accounts.
-* [dbctl database listusers](dbctl_database_listusers.md)	 - list normal users.
-* [dbctl database revoke-role](dbctl_database_revoke-role.md)	 - revoke user role.
-* [dbctl database service](dbctl_database_service.md)	 - Run dbctl as a daemon and provide api service.
-* [dbctl database switchover](dbctl_database_switchover.md)	 - execute a switchover request.
 
 #### Go Back to [dbctl Overview](dbctl.md) Homepage.
 

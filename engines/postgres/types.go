@@ -25,13 +25,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/pkg/errors"
 
 	"github.com/apecloud/dbctl/engines"
-)
-
-var (
-	ClusterHasNoLeader = errors.New("cluster has no leader now")
 )
 
 const (
@@ -61,11 +56,6 @@ type PgxPoolIFace interface {
 	PgxIFace
 	Acquire(ctx context.Context) (*pgxpool.Conn, error)
 	Close()
-}
-
-type ConsensusMemberHealthStatus struct {
-	Connected   bool
-	LogDelayNum int64
 }
 
 type PatroniResp struct {

@@ -23,12 +23,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/pkg/errors"
-	"github.com/spf13/cast"
 )
 
 // Query is equivalent to QueryWithHost(ctx, sql, ""), query itself.
@@ -73,22 +71,6 @@ func (mgr *Manager) QueryOthers(ctx context.Context, sql string, host string) (r
 	}()
 
 	return conn.Query(ctx, sql)
-}
-
-// GetLeaderAddr query leader addr from db kernel
-func (mgr *Manager) GetLeaderAddr(ctx context.Context) (string, error) {
-	queryLeaderAddrSQL := `select ip_port from consensus_cluster_status where server_id = (select current_leader from consensus_member_status);`
-	resp, err := mgr.Query(ctx, queryLeaderAddrSQL)
-	if err != nil {
-		return "", err
-	}
-
-	resMap, err := ParseQuery(string(resp))
-	if err != nil {
-		return "", err
-	}
-
-	return strings.Split(cast.ToString(resMap[0]["ip_port"]), ":")[0], nil
 }
 
 // Exec is equivalent to ExecWithHost(ctx, sql, ""), exec itself.

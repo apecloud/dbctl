@@ -58,32 +58,3 @@ func TestConfig_GetLocalDBConn(t *testing.T) {
 		assert.NotNil(t, db)
 	})
 }
-
-func TestConfig_GetDBConnWithAddr(t *testing.T) {
-	t.Run("get local DB connection successfully", func(t *testing.T) {
-		fakeConfig, err := NewConfig()
-		assert.Nil(t, err)
-
-		db, err := fakeConfig.GetDBConnWithAddr(fakeAddr)
-		assert.Nil(t, err)
-		assert.NotNil(t, db)
-	})
-}
-
-func TestConfig_GetDBPort(t *testing.T) {
-	t.Run("parse dsn failed", func(t *testing.T) {
-		fakeConfig, err := NewConfig()
-		assert.Nil(t, err)
-
-		port := fakeConfig.GetDBPort()
-		assert.Equal(t, 3306, port)
-	})
-
-	t.Run("get db port successfully", func(t *testing.T) {
-		fakeConfig, err := NewConfig()
-		assert.Nil(t, err)
-
-		port := fakeConfig.GetDBPort()
-		assert.Equal(t, 3306, port)
-	})
-}

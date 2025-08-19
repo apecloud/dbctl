@@ -24,8 +24,6 @@ import (
 	"crypto/x509"
 	"database/sql"
 	"fmt"
-	"net"
-	"strconv"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -173,42 +171,4 @@ func (config *Config) GetLocalDBConn() (*sql.DB, error) {
 	}
 
 	return db, nil
-}
-
-func (config *Config) GetDBConnWithAddr(addr string) (*sql.DB, error) {
-	mysqlConfig, err := mysql.ParseDSN(config.URL)
-	if err != nil {
-		return nil, errors.Wrapf(err, "illegal Data Source Name (DNS) specified by %s", connectionURLKey)
-	}
-	mysqlConfig.User = config.Username
-	mysqlConfig.Passwd = config.Password
-	mysqlConfig.Timeout = time.Second * 5
-	mysqlConfig.ReadTimeout = time.Second * 5
-	mysqlConfig.WriteTimeout = time.Second * 5
-	mysqlConfig.Addr = addr
-	db, err := GetDBConnection(mysqlConfig.FormatDSN())
-	if err != nil {
-		return nil, errors.Wrap(err, "get DB connection failed")
-	}
-
-	return db, nil
-}
-
-func (config *Config) GetDBPort() int {
-	mysqlConfig, err := mysql.ParseDSN(config.URL)
-	if err != nil {
-		return defaultDBPort
-	}
-
-	_, portStr, err := net.SplitHostPort(mysqlConfig.Addr)
-	if err != nil {
-		return defaultDBPort
-	}
-
-	port, err := strconv.Atoi(portStr)
-	if err != nil {
-		return defaultDBPort
-	}
-
-	return port
 }

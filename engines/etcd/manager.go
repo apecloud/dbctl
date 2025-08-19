@@ -21,8 +21,6 @@ package etcd
 
 import (
 	"context"
-	"strconv"
-	"strings"
 	"time"
 
 	v3 "go.etcd.io/etcd/client/v3"
@@ -96,17 +94,4 @@ func (mgr *Manager) IsDBStartupReady() bool {
 	mgr.DBStartupReady = true
 	mgr.Logger.Info("DB startup ready")
 	return true
-}
-
-func (mgr *Manager) GetRunningPort() int {
-	index := strings.Index(mgr.endpoint, ":")
-	if index < 0 {
-		return defaultPort
-	}
-	port, err := strconv.Atoi(mgr.endpoint[index+1:])
-	if err != nil {
-		return defaultPort
-	}
-
-	return port
 }

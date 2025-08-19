@@ -46,7 +46,6 @@ type Manager struct {
 	client           redis.UniversalClient
 	clientSettings   *Settings
 	sentinelClient   *redis.SentinelClient
-	roleProbePeriod  int64
 	masterName       string
 	currentRedisHost string
 	currentRedisPort string
@@ -77,8 +76,7 @@ func NewManager() (engines.DBManager, error) {
 		return nil, err
 	}
 	mgr := &Manager{
-		DBManagerBase:   *managerBase,
-		roleProbePeriod: int64(viper.GetInt(constant.KBEnvRoleProbePeriod)),
+		DBManagerBase: *managerBase,
 	}
 
 	mgr.masterName = mgr.ClusterCompName

@@ -61,15 +61,6 @@ func TestETCDDBManager(t *testing.T) {
 	RunSpecs(t, "ETCD DBManager. Suite")
 }
 
-var _ = BeforeSuite(func() {
-	// Init mock dcs store
-
-	// Start ETCD Server
-	// server, err := StartEtcdServer()
-	// Expect(err).Should(BeNil())
-	// etcdServer = server
-})
-
 var _ = AfterSuite(func() {
 	StopEtcdServer(etcdServer)
 })

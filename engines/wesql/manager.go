@@ -26,11 +26,6 @@ import (
 	"github.com/apecloud/dbctl/engines/mysql"
 )
 
-const (
-	Role   = "ROLE"
-	Leader = "Leader"
-)
-
 type Manager struct {
 	mysql.Manager
 }

@@ -31,10 +31,6 @@ import (
 )
 
 const (
-	host          = "host"
-	username      = "username"
-	password      = "password"
-	databaseName  = "databaseName"
 	adminDatabase = "admin"
 
 	defaultTimeout             = 5 * time.Second

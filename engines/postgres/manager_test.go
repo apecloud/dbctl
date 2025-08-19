@@ -56,48 +56,6 @@ func MockDatabase(t *testing.T) (*Manager, pgxmock.PgxPoolIface, error) {
 	return manager, mock, err
 }
 
-func TestReadWrite(t *testing.T) {
-	ctx := context.TODO()
-	manager, mock, _ := MockDatabase(t)
-	defer mock.Close()
-
-	t.Run("write check success", func(t *testing.T) {
-		mock.ExpectExec(`create table if not exists`).
-			WillReturnResult(pgxmock.NewResult("CREATE TABLE", 0))
-
-		ok := manager.WriteCheck(ctx, "")
-		assert.True(t, ok)
-	})
-
-	t.Run("write check failed", func(t *testing.T) {
-		mock.ExpectExec(`create table if not exists`).
-			WillReturnError(fmt.Errorf("some error"))
-
-		ok := manager.WriteCheck(ctx, "")
-		assert.False(t, ok)
-	})
-
-	t.Run("read check success", func(t *testing.T) {
-		mock.ExpectQuery("select").
-			WillReturnRows(pgxmock.NewRows([]string{"check_ts"}).AddRow(1))
-
-		ok := manager.ReadCheck(ctx, "")
-		assert.True(t, ok)
-	})
-
-	t.Run("read check failed", func(t *testing.T) {
-		mock.ExpectQuery("select").
-			WillReturnError(fmt.Errorf("some error"))
-
-		ok := manager.ReadCheck(ctx, "")
-		assert.False(t, ok)
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
-}
-
 func TestPgIsReady(t *testing.T) {
 	ctx := context.TODO()
 	manager, mock, _ := MockDatabase(t)
@@ -116,32 +74,6 @@ func TestPgIsReady(t *testing.T) {
 		if isReady := manager.IsPgReady(ctx); isReady {
 			t.Errorf("expect pg is not ready, but get ready")
 		}
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
-}
-
-func TestPgReload(t *testing.T) {
-	ctx := context.TODO()
-	manager, mock, _ := MockDatabase(t)
-	defer mock.Close()
-
-	t.Run("pg reload success", func(t *testing.T) {
-		mock.ExpectExec("select pg_reload_conf()").
-			WillReturnResult(pgxmock.NewResult("select", 1))
-
-		err := manager.PgReload(ctx)
-		assert.Nil(t, err)
-	})
-
-	t.Run("pg reload failed", func(t *testing.T) {
-		mock.ExpectExec("select pg_reload_conf()").
-			WillReturnError(fmt.Errorf("some error"))
-
-		err := manager.PgReload(ctx)
-		assert.NotNil(t, err)
 	})
 
 	if err := mock.ExpectationsWereMet(); err != nil {

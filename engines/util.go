@@ -25,13 +25,6 @@ import (
 	"strings"
 )
 
-const (
-	// types for probe
-	CheckRunningType int = iota
-	CheckStatusType
-	CheckRoleChangedType
-)
-
 func GetIndex(memberName string) (int, error) {
 	i := strings.LastIndex(memberName, "-")
 	if i < 0 {
@@ -43,5 +36,3 @@ func GetIndex(memberName string) (int, error) {
 func AddSingleQuote(str string) string {
 	return "'" + str + "'"
 }
-
-type Properties map[string]string
