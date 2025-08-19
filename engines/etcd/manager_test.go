@@ -80,7 +80,7 @@ var _ = Describe("ETCD DBManager", func() {
 			}
 			role, err := manager.GetReplicaRole(context.Background())
 			Expect(err).Should(BeNil())
-			Expect(role).Should(Equal("Leader"))
+			Expect(role).Should(Equal("leader"))
 		})
 	})
 })

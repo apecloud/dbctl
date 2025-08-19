@@ -49,17 +49,6 @@ func TestNewManager(t *testing.T) {
 		assert.True(t, ok)
 		assert.Equal(t, "pod-test-0", manager.CurrentMemberName)
 		assert.Equal(t, "cluster-component-test", manager.ClusterCompName)
-		assert.Equal(t, uint(1), manager.serverID)
-	})
-
-	viper.Set(constant.KBEnvPodName, "fake")
-	viper.Set(constant.KBEnvClusterCompName, fakeClusterCompName)
-	t.Run("get server id failed", func(t *testing.T) {
-		manager, err := NewManager()
-
-		assert.Nil(t, manager)
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "the format of member name is wrong")
 	})
 }
 

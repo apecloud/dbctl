@@ -98,31 +98,3 @@ func TestGetMemberRoleWithHost(t *testing.T) {
 		t.Errorf("there were unfulfilled expectations: %v", err)
 	}
 }
-
-func TestIsLeaderWithHost(t *testing.T) {
-	ctx := context.TODO()
-	manager, mock, _ := MockDatabase(t)
-	defer mock.Close()
-
-	t.Run("get member role with host failed", func(t *testing.T) {
-		mock.ExpectQuery("select role from consensus_member_status;").
-			WillReturnError(fmt.Errorf("some error"))
-
-		isLeader, err := manager.IsLeaderWithHost(ctx, "")
-		assert.False(t, isLeader)
-		assert.NotNil(t, err)
-	})
-
-	t.Run("check is leader success", func(t *testing.T) {
-		mock.ExpectQuery("select role from consensus_member_status;").
-			WillReturnRows(pgxmock.NewRows([]string{"role"}).AddRow("Leader"))
-
-		isLeader, err := manager.IsLeaderWithHost(ctx, "")
-		assert.True(t, isLeader)
-		assert.Nil(t, err)
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
-}

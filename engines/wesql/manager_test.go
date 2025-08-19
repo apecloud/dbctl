@@ -23,11 +23,9 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/apecloud/dbctl/constant"
 	"github.com/apecloud/dbctl/engines"
 	"github.com/apecloud/dbctl/engines/mysql"
 )
@@ -58,15 +56,6 @@ func mockDatabase(t *testing.T) (*Manager, sqlmock.Sqlmock, error) {
 }
 
 func TestNewManager(t *testing.T) {
-	t.Run("new mysql manager failed", func(t *testing.T) {
-		manager, err := NewManager()
-
-		assert.Nil(t, manager)
-		assert.NotNil(t, err)
-	})
-
-	viper.Set(constant.KBEnvPodName, fakePodName)
-	defer viper.Reset()
 	t.Run("new manger successfully", func(t *testing.T) {
 		manager, err := NewManager()
 

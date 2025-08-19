@@ -24,8 +24,8 @@ const (
 	SECONDARY = "secondary"
 	MASTER    = "master"
 	SLAVE     = "slave"
-	LEADER    = "Leader"
-	FOLLOWER  = "Follower"
-	LEARNER   = "Learner"
-	CANDIDATE = "Candidate"
+	LEADER    = "leader"
+	FOLLOWER  = "follower"
+	LEARNER   = "learner"
+	CANDIDATE = "candidate"
 )

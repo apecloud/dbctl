@@ -24,15 +24,9 @@ import (
 )
 
 const (
-	errMsgNoUserName     = "no username provided"
-	errMsgNoPassword     = "no password provided"
-	errMsgNoRoleName     = "no rolename provided"
 	errMsgNotImplemented = "not implemented"
 )
 
 var (
-	ErrNoUserName     = errors.New(errMsgNoUserName)
-	ErrNoPassword     = errors.New(errMsgNoPassword)
-	ErrNoRoleName     = errors.New(errMsgNoRoleName)
 	ErrNotImplemented = errors.New(errMsgNotImplemented)
 )

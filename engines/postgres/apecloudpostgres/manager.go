@@ -27,7 +27,6 @@ import (
 	"github.com/spf13/cast"
 
 	"github.com/apecloud/dbctl/engines"
-	"github.com/apecloud/dbctl/engines/models"
 	"github.com/apecloud/dbctl/engines/postgres"
 )
 
@@ -49,15 +48,6 @@ func NewManager() (engines.DBManager, error) {
 
 	Mgr.Manager = *baseManager.(*postgres.Manager)
 	return Mgr, nil
-}
-
-func (mgr *Manager) IsLeaderWithHost(ctx context.Context, host string) (bool, error) {
-	role, err := mgr.GetMemberRoleWithHost(ctx, host)
-	if err != nil {
-		return false, errors.Errorf("check is leader with host:%s failed, err:%v", host, err)
-	}
-
-	return role == strings.ToLower(models.LEADER), nil
 }
 
 func (mgr *Manager) GetMemberRoleWithHost(ctx context.Context, host string) (string, error) {

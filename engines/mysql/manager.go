@@ -34,7 +34,6 @@ type Manager struct {
 	engines.DBManagerBase
 	DB                           *sql.DB
 	hostname                     string
-	serverID                     uint
 	version                      string
 	binlogFormat                 string
 	logbinEnabled                bool
@@ -56,11 +55,6 @@ func NewManager() (engines.DBManager, error) {
 		return nil, err
 	}
 
-	serverID, err := engines.GetIndex(managerBase.CurrentMemberName)
-	if err != nil {
-		return nil, err
-	}
-
 	db, err := config.GetLocalDBConn()
 	if err != nil {
 		return nil, errors.Wrap(err, "connect to MySQL")
@@ -68,7 +62,6 @@ func NewManager() (engines.DBManager, error) {
 
 	mgr := &Manager{
 		DBManagerBase: *managerBase,
-		serverID:      uint(serverID) + 1,
 		DB:            db,
 	}
 
