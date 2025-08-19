@@ -27,7 +27,6 @@ import (
 
 // Lorry
 const (
-	KBEnvEngineType      = "KB_ENGINE_TYPE"
 	KBEnvServiceUser     = "KB_SERVICE_USER"
 	KBEnvServicePassword = "KB_SERVICE_PASSWORD"
 	// KBEnvServiceRoles defines the Roles configured in the cluster definition that are visible to users.
