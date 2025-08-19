@@ -21,7 +21,6 @@ package register
 
 import (
 	"github.com/apecloud/dbctl/operations"
-	_ "github.com/apecloud/dbctl/operations/component"
 	_ "github.com/apecloud/dbctl/operations/replica"
 	_ "github.com/apecloud/dbctl/operations/sql"
 )

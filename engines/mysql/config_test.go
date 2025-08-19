@@ -27,10 +27,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const (
-	fakeAddr = "fake-addr"
-)
-
 func TestNewConfig(t *testing.T) {
 	fs = afero.NewMemMapFs()
 	defer func() {

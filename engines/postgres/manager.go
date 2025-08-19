@@ -37,7 +37,6 @@ type Manager struct {
 	Pool         PgxPoolIFace
 	Proc         *process.Process
 	Config       *Config
-	isLeader     int
 }
 
 func NewManager() (engines.DBManager, error) {
