@@ -76,18 +76,6 @@ func (mgr *DBManagerBase) Query(context.Context, string) ([]byte, error) {
 	return []byte{}, models.ErrNotImplemented
 }
 
-func (mgr *DBManagerBase) GetPort() (int, error) {
-	return 0, models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) Lock(context.Context, string) error {
-	return models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) Unlock(context.Context) error {
-	return models.ErrNotImplemented
-}
-
 func (mgr *DBManagerBase) ShutDownWithWait() {
 	mgr.Logger.Info("Override me if need")
 }

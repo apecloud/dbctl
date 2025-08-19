@@ -105,30 +105,6 @@ func (mgr *Manager) GetVersion(ctx context.Context) (string, error) {
 	return mgr.version, nil
 }
 
-func (mgr *Manager) Lock(context.Context, string) error {
-	setReadOnly := `set global read_only=on;`
-
-	_, err := mgr.DB.Exec(setReadOnly)
-	if err != nil {
-		mgr.Logger.Info("Lock failed", "error", err.Error())
-		return err
-	}
-	mgr.IsLocked = true
-	return nil
-}
-
-func (mgr *Manager) Unlock(context.Context) error {
-	setReadOnlyOff := `set global read_only=off;`
-
-	_, err := mgr.DB.Exec(setReadOnlyOff)
-	if err != nil {
-		mgr.Logger.Info("Unlock failed", "error", err.Error())
-		return err
-	}
-	mgr.IsLocked = false
-	return nil
-}
-
 func (mgr *Manager) ShutDownWithWait() {
 	for _, db := range connectionPoolCache {
 		_ = db.Close()

@@ -70,21 +70,6 @@ func (mr *MockDBManagerMockRecorder) Exec(arg0, arg1 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockDBManager)(nil).Exec), arg0, arg1)
 }
 
-// GetPort mocks base method.
-func (m *MockDBManager) GetPort() (int, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPort")
-	ret0, _ := ret[0].(int)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetPort indicates an expected call of GetPort.
-func (mr *MockDBManagerMockRecorder) GetPort() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPort", reflect.TypeOf((*MockDBManager)(nil).GetPort))
-}
-
 // GetReplicaRole mocks base method.
 func (m *MockDBManager) GetReplicaRole(arg0 context.Context) (string, error) {
 	m.ctrl.T.Helper()
@@ -114,20 +99,6 @@ func (mr *MockDBManagerMockRecorder) IsDBStartupReady() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsDBStartupReady", reflect.TypeOf((*MockDBManager)(nil).IsDBStartupReady))
 }
 
-// Lock mocks base method.
-func (m *MockDBManager) Lock(arg0 context.Context, arg1 string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Lock", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Lock indicates an expected call of Lock.
-func (mr *MockDBManagerMockRecorder) Lock(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Lock", reflect.TypeOf((*MockDBManager)(nil).Lock), arg0, arg1)
-}
-
 // Query mocks base method.
 func (m *MockDBManager) Query(arg0 context.Context, arg1 string) ([]byte, error) {
 	m.ctrl.T.Helper()
@@ -153,18 +124,4 @@ func (m *MockDBManager) ShutDownWithWait() {
 func (mr *MockDBManagerMockRecorder) ShutDownWithWait() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ShutDownWithWait", reflect.TypeOf((*MockDBManager)(nil).ShutDownWithWait))
-}
-
-// Unlock mocks base method.
-func (m *MockDBManager) Unlock(arg0 context.Context) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Unlock", arg0)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Unlock indicates an expected call of Unlock.
-func (mr *MockDBManagerMockRecorder) Unlock(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Unlock", reflect.TypeOf((*MockDBManager)(nil).Unlock), arg0)
 }

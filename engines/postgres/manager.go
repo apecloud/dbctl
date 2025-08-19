@@ -132,39 +132,3 @@ func (mgr *Manager) IsPgReady(ctx context.Context) bool {
 
 	return true
 }
-
-func (mgr *Manager) Lock(ctx context.Context, reason string) error {
-	sql := "alter system set default_transaction_read_only=on;"
-
-	_, err := mgr.Exec(ctx, sql)
-	if err != nil {
-		mgr.Logger.Error(err, fmt.Sprintf("exec sql:%s failed", sql))
-		return err
-	}
-
-	if err = mgr.PgReload(ctx); err != nil {
-		mgr.Logger.Error(err, "reload conf failed")
-		return err
-	}
-
-	mgr.Logger.Info(fmt.Sprintf("Lock db success: %s", reason))
-	return nil
-}
-
-func (mgr *Manager) Unlock(ctx context.Context) error {
-	sql := "alter system set default_transaction_read_only=off;"
-
-	_, err := mgr.Exec(ctx, sql)
-	if err != nil {
-		mgr.Logger.Error(err, fmt.Sprintf("exec sql:%s failed", sql))
-		return err
-	}
-
-	if err = mgr.PgReload(ctx); err != nil {
-		mgr.Logger.Error(err, "reload conf failed")
-		return err
-	}
-
-	mgr.Logger.Info("UnLock db success")
-	return nil
-}

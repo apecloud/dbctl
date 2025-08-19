@@ -28,14 +28,8 @@ type DBManager interface {
 
 	GetReplicaRole(context.Context) (string, error)
 
-	// Readonly lock for disk full
-	Lock(context.Context, string) error
-	Unlock(context.Context) error
-
 	Exec(context.Context, string) (int64, error)
 	Query(context.Context, string) ([]byte, error)
-
-	GetPort() (int, error)
 
 	ShutDownWithWait()
 }

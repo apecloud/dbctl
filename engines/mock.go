@@ -19,11 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package engines
 
-import (
-	"context"
-	"fmt"
-)
-
 type MockManager struct {
 	DBManagerBase
 }
@@ -32,12 +27,4 @@ var _ DBManager = &MockManager{}
 
 func (*MockManager) IsDBStartupReady() bool {
 	return true
-}
-
-func (*MockManager) Lock(context.Context, string) error {
-	return fmt.Errorf("NotSupported")
-}
-
-func (*MockManager) Unlock(context.Context) error {
-	return fmt.Errorf("NotSupported")
 }

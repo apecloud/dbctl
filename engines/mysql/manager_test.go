@@ -20,12 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package mysql
 
 import (
-	"context"
-	"fmt"
 	"testing"
 	"time"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 
@@ -94,63 +91,6 @@ func TestManager_IsDBStartupReady(t *testing.T) {
 
 		dbReady := manager.IsDBStartupReady()
 		assert.True(t, dbReady)
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
-}
-
-func TestManager_Lock(t *testing.T) {
-	ctx := context.TODO()
-	manager, mock, _ := mockDatabase(t)
-
-	t.Run("lock failed", func(t *testing.T) {
-		mock.ExpectExec("set global read_only=on").
-			WillReturnError(fmt.Errorf("some error"))
-
-		err := manager.Lock(ctx, "")
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "some error")
-		assert.False(t, manager.IsLocked)
-	})
-
-	t.Run("lock successfully", func(t *testing.T) {
-		mock.ExpectExec("set global read_only=on").
-			WillReturnResult(sqlmock.NewResult(1, 1))
-
-		err := manager.Lock(ctx, "")
-		assert.Nil(t, err)
-		assert.True(t, manager.IsLocked)
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
-}
-
-func TestManager_Unlock(t *testing.T) {
-	ctx := context.TODO()
-	manager, mock, _ := mockDatabase(t)
-	manager.IsLocked = true
-
-	t.Run("unlock failed", func(t *testing.T) {
-		mock.ExpectExec("set global read_only=off").
-			WillReturnError(fmt.Errorf("some error"))
-
-		err := manager.Unlock(ctx)
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "some error")
-		assert.True(t, manager.IsLocked)
-	})
-
-	t.Run("lock successfully", func(t *testing.T) {
-		mock.ExpectExec("set global read_only=off").
-			WillReturnResult(sqlmock.NewResult(1, 1))
-
-		err := manager.Unlock(ctx)
-		assert.Nil(t, err)
-		assert.False(t, manager.IsLocked)
 	})
 
 	if err := mock.ExpectationsWereMet(); err != nil {

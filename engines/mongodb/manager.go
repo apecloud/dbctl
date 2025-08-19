@@ -21,12 +21,10 @@ package mongodb
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -137,66 +135,4 @@ func (mgr *Manager) GetMemberAddrsFromRSConfig(rsConfig *RSConfig) []string {
 		hosts[i] = member.Host
 	}
 	return hosts
-}
-
-func (mgr *Manager) Lock(ctx context.Context, reason string) error {
-	mgr.Logger.Info(fmt.Sprintf("Lock db: %s", reason))
-	m := bson.D{
-		{Key: "fsync", Value: 1},
-		{Key: "lock", Value: true},
-		{Key: "comment", Value: reason},
-	}
-	lockResp := LockResp{}
-
-	response := mgr.Client.Database("admin").RunCommand(ctx, m)
-	if response.Err() != nil {
-		mgr.Logger.Info(fmt.Sprintf("Lock db (%s) failed", reason), "error", response.Err().Error())
-		return response.Err()
-	}
-	if err := response.Decode(&lockResp); err != nil {
-		err := errors.Wrap(err, "failed to decode lock response")
-		return err
-	}
-
-	if lockResp.OK != 1 {
-		err := errors.Errorf("mongo says: %s", lockResp.Errmsg)
-		return err
-	}
-	mgr.IsLocked = true
-	mgr.Logger.Info(fmt.Sprintf("Lock db success times: %d", lockResp.LockCount))
-	return nil
-}
-
-func (mgr *Manager) Unlock(ctx context.Context) error {
-	mgr.Logger.Info("Unlock db")
-	m := bson.M{"fsyncUnlock": 1}
-	unlockResp := LockResp{}
-	response := mgr.Client.Database("admin").RunCommand(ctx, m)
-	if response.Err() != nil {
-		mgr.Logger.Info("Unlock db failed", "error", response.Err().Error())
-		return response.Err()
-	}
-	if err := response.Decode(&unlockResp); err != nil {
-		err := errors.Wrap(err, "failed to decode unlock response")
-		return err
-	}
-
-	if unlockResp.OK != 1 {
-		err := errors.Errorf("mongo says: %s", unlockResp.Errmsg)
-		return err
-	}
-	for unlockResp.LockCount > 0 {
-		response = mgr.Client.Database("admin").RunCommand(ctx, m)
-		if response.Err() != nil {
-			mgr.Logger.Info("Unlock db failed", "error", response.Err().Error())
-			return response.Err()
-		}
-		if err := response.Decode(&unlockResp); err != nil {
-			err := errors.Wrap(err, "failed to decode unlock response")
-			return err
-		}
-	}
-	mgr.IsLocked = false
-	mgr.Logger.Info("Unlock db success")
-	return nil
 }
