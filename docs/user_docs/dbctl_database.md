@@ -32,11 +32,7 @@ dbctl mongodb createuser --username root --password password
 
 ```
       --add_dir_header                    If true, adds the file directory to the header of the log messages
-      --address string                    The HTTP Server listen address for Lorry service. (default "0.0.0.0")
       --alsologtostderr                   log to standard error as well as files (no effect when -logtostderr=true)
-      --api-logging                       Enable api logging for Lorry request. (default true)
-      --config-path string                dbctl default config directory for builtin type (default "/tools/config/dbctl/components/")
-      --disable-dns-checker               disable dns checker, for test&dev
       --kubeconfig string                 Paths to a kubeconfig. Only required if out-of-cluster.
       --log_backtrace_at traceLocation    when logging hits line file:N, emit a stack trace (default :0)
       --log_dir string                    If non-empty, write log files in this directory (no effect when -logtostderr=true)
@@ -44,11 +40,9 @@ dbctl mongodb createuser --username root --password password
       --log_file_max_size uint            Defines the maximum size a log file can grow to (no effect when -logtostderr=true). Unit is megabytes. If the value is 0, the maximum file size is unlimited. (default 1800)
       --logtostderr                       log to standard error instead of files (default true)
       --one_output                        If true, only write logs to their native severity level (vs also writing to each lower severity level; no effect when -logtostderr=true)
-      --port int                          The HTTP Server listen port for Lorry service. (default 5001)
       --skip_headers                      If true, avoid header prefixes in the log messages
       --skip_log_headers                  If true, avoid headers when opening log files (no effect when -logtostderr=true)
       --stderrthreshold severity          logs at or above this threshold go to stderr when writing to files and stderr (no effect when -logtostderr=true or -alsologtostderr=true) (default 2)
-      --tools-dir string                  The directory of tools binaries (default "/tools/")
   -v, --v Level                           number for the log level verbosity
       --vmodule moduleSpec                comma-separated list of pattern=N settings for file-filtered logging
       --zap-devel                         Development Mode defaults(encoder=consoleEncoder,logLevel=Debug,stackTraceLevel=Warn). Production Mode defaults(encoder=jsonEncoder,logLevel=Info,stackTraceLevel=Error) (default true)
@@ -62,6 +56,7 @@ dbctl mongodb createuser --username root --password password
 
 
 * [dbctl database getrole](dbctl_database_getrole.md)	 - get role of the replica.
+* [dbctl database service](dbctl_database_service.md)	 - Run dbctl as a daemon and provide api service.
 
 #### Go Back to [dbctl Overview](dbctl.md) Homepage.
 

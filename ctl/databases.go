@@ -26,9 +26,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
 
-	"github.com/apecloud/dbctl/constant"
 	"github.com/apecloud/dbctl/engines/models"
 	"github.com/apecloud/dbctl/engines/register"
 )
@@ -43,7 +41,6 @@ dbctl mongodb createuser --username root --password password
 	Args: cobra.MinimumNArgs(0),
 	PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 		commands := stripFlags(os.Args[1:], cmd)
-		// fmt.Println("commands: ", commands)
 		if len(commands) < 1 {
 			return errors.New("please specify a database subcommand")
 		}
@@ -51,7 +48,6 @@ dbctl mongodb createuser --username root --password password
 		if dbType == "database" {
 			return errors.New("please specify a database type supported by dbctl, the valid types are: " + strings.Join(models.GetEngineTypeListStr(), ", "))
 		}
-		viper.SetDefault(constant.KBEnvEngineType, commands[0])
 
 		// Initialize DB Manager
 		err := register.InitDBManager(dbType)
@@ -95,7 +91,7 @@ func stripFlags(args []string, c *cobra.Command) []string {
 		return args
 	}
 
-	commands := []string{}
+	var commands []string
 	flags := c.Flags()
 
 Loop:

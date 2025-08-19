@@ -10,3 +10,9 @@ get role of the replica.
 
 
 
+## [service](dbctl_database_service.md)
+
+Run dbctl as a daemon and provide api service.
+
+
+
