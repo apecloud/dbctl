@@ -29,8 +29,6 @@ import (
 	context "context"
 	reflect "reflect"
 
-	models "github.com/apecloud/dbctl/engines/models"
-	logr "github.com/go-logr/logr"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -57,49 +55,6 @@ func (m *MockDBManager) EXPECT() *MockDBManagerMockRecorder {
 	return m.recorder
 }
 
-// CreateUser mocks base method.
-func (m *MockDBManager) CreateUser(arg0 context.Context, arg1, arg2 string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateUser", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// CreateUser indicates an expected call of CreateUser.
-func (mr *MockDBManagerMockRecorder) CreateUser(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockDBManager)(nil).CreateUser), arg0, arg1, arg2)
-}
-
-// DeleteUser mocks base method.
-func (m *MockDBManager) DeleteUser(arg0 context.Context, arg1 string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteUser", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// DeleteUser indicates an expected call of DeleteUser.
-func (mr *MockDBManagerMockRecorder) DeleteUser(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockDBManager)(nil).DeleteUser), arg0, arg1)
-}
-
-// DescribeUser mocks base method.
-func (m *MockDBManager) DescribeUser(arg0 context.Context, arg1 string) (*models.UserInfo, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DescribeUser", arg0, arg1)
-	ret0, _ := ret[0].(*models.UserInfo)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// DescribeUser indicates an expected call of DescribeUser.
-func (mr *MockDBManagerMockRecorder) DescribeUser(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DescribeUser", reflect.TypeOf((*MockDBManager)(nil).DescribeUser), arg0, arg1)
-}
-
 // Exec mocks base method.
 func (m *MockDBManager) Exec(arg0 context.Context, arg1 string) (int64, error) {
 	m.ctrl.T.Helper()
@@ -113,34 +68,6 @@ func (m *MockDBManager) Exec(arg0 context.Context, arg1 string) (int64, error) {
 func (mr *MockDBManagerMockRecorder) Exec(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exec", reflect.TypeOf((*MockDBManager)(nil).Exec), arg0, arg1)
-}
-
-// GetCurrentMemberName mocks base method.
-func (m *MockDBManager) GetCurrentMemberName() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCurrentMemberName")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// GetCurrentMemberName indicates an expected call of GetCurrentMemberName.
-func (mr *MockDBManagerMockRecorder) GetCurrentMemberName() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrentMemberName", reflect.TypeOf((*MockDBManager)(nil).GetCurrentMemberName))
-}
-
-// GetLogger mocks base method.
-func (m *MockDBManager) GetLogger() logr.Logger {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetLogger")
-	ret0, _ := ret[0].(logr.Logger)
-	return ret0
-}
-
-// GetLogger indicates an expected call of GetLogger.
-func (mr *MockDBManagerMockRecorder) GetLogger() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLogger", reflect.TypeOf((*MockDBManager)(nil).GetLogger))
 }
 
 // GetPort mocks base method.
@@ -173,20 +100,6 @@ func (mr *MockDBManagerMockRecorder) GetReplicaRole(arg0 interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetReplicaRole", reflect.TypeOf((*MockDBManager)(nil).GetReplicaRole), arg0)
 }
 
-// GrantUserRole mocks base method.
-func (m *MockDBManager) GrantUserRole(arg0 context.Context, arg1, arg2 string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GrantUserRole", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// GrantUserRole indicates an expected call of GrantUserRole.
-func (mr *MockDBManagerMockRecorder) GrantUserRole(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GrantUserRole", reflect.TypeOf((*MockDBManager)(nil).GrantUserRole), arg0, arg1, arg2)
-}
-
 // IsDBStartupReady mocks base method.
 func (m *MockDBManager) IsDBStartupReady() bool {
 	m.ctrl.T.Helper()
@@ -199,36 +112,6 @@ func (m *MockDBManager) IsDBStartupReady() bool {
 func (mr *MockDBManagerMockRecorder) IsDBStartupReady() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsDBStartupReady", reflect.TypeOf((*MockDBManager)(nil).IsDBStartupReady))
-}
-
-// ListSystemAccounts mocks base method.
-func (m *MockDBManager) ListSystemAccounts(arg0 context.Context) ([]models.UserInfo, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListSystemAccounts", arg0)
-	ret0, _ := ret[0].([]models.UserInfo)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListSystemAccounts indicates an expected call of ListSystemAccounts.
-func (mr *MockDBManagerMockRecorder) ListSystemAccounts(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSystemAccounts", reflect.TypeOf((*MockDBManager)(nil).ListSystemAccounts), arg0)
-}
-
-// ListUsers mocks base method.
-func (m *MockDBManager) ListUsers(arg0 context.Context) ([]models.UserInfo, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListUsers", arg0)
-	ret0, _ := ret[0].([]models.UserInfo)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListUsers indicates an expected call of ListUsers.
-func (mr *MockDBManagerMockRecorder) ListUsers(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListUsers", reflect.TypeOf((*MockDBManager)(nil).ListUsers), arg0)
 }
 
 // Lock mocks base method.
@@ -258,20 +141,6 @@ func (m *MockDBManager) Query(arg0 context.Context, arg1 string) ([]byte, error)
 func (mr *MockDBManagerMockRecorder) Query(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Query", reflect.TypeOf((*MockDBManager)(nil).Query), arg0, arg1)
-}
-
-// RevokeUserRole mocks base method.
-func (m *MockDBManager) RevokeUserRole(arg0 context.Context, arg1, arg2 string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RevokeUserRole", arg0, arg1, arg2)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// RevokeUserRole indicates an expected call of RevokeUserRole.
-func (mr *MockDBManagerMockRecorder) RevokeUserRole(arg0, arg1, arg2 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RevokeUserRole", reflect.TypeOf((*MockDBManager)(nil).RevokeUserRole), arg0, arg1, arg2)
 }
 
 // ShutDownWithWait mocks base method.

@@ -24,7 +24,6 @@ import (
 	_ "github.com/apecloud/dbctl/operations/component"
 	_ "github.com/apecloud/dbctl/operations/replica"
 	_ "github.com/apecloud/dbctl/operations/sql"
-	_ "github.com/apecloud/dbctl/operations/user"
 	_ "github.com/apecloud/dbctl/operations/volume"
 )
 

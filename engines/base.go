@@ -60,20 +60,8 @@ func (mgr *DBManagerBase) IsDBStartupReady() bool {
 	return mgr.DBStartupReady
 }
 
-func (mgr *DBManagerBase) GetLogger() logr.Logger {
-	return mgr.Logger
-}
-
 func (mgr *DBManagerBase) SetLogger(logger logr.Logger) {
 	mgr.Logger = logger
-}
-
-func (mgr *DBManagerBase) GetCurrentMemberName() string {
-	return mgr.CurrentMemberName
-}
-
-func (mgr *DBManagerBase) Demote(context.Context) error {
-	return models.ErrNotImplemented
 }
 
 func (mgr *DBManagerBase) GetReplicaRole(context.Context) (string, error) {
@@ -90,34 +78,6 @@ func (mgr *DBManagerBase) Query(context.Context, string) ([]byte, error) {
 
 func (mgr *DBManagerBase) GetPort() (int, error) {
 	return 0, models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) ListUsers(context.Context) ([]models.UserInfo, error) {
-	return nil, models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) ListSystemAccounts(context.Context) ([]models.UserInfo, error) {
-	return nil, models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) CreateUser(context.Context, string, string) error {
-	return models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) DeleteUser(context.Context, string) error {
-	return models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) DescribeUser(context.Context, string) (*models.UserInfo, error) {
-	return nil, models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) GrantUserRole(context.Context, string, string) error {
-	return models.ErrNotImplemented
-}
-
-func (mgr *DBManagerBase) RevokeUserRole(context.Context, string, string) error {
-	return models.ErrNotImplemented
 }
 
 func (mgr *DBManagerBase) Lock(context.Context, string) error {

@@ -21,10 +21,6 @@ package engines
 
 import (
 	"context"
-
-	"github.com/go-logr/logr"
-
-	"github.com/apecloud/dbctl/engines/models"
 )
 
 type DBManager interface {
@@ -32,28 +28,14 @@ type DBManager interface {
 
 	GetReplicaRole(context.Context) (string, error)
 
-	GetCurrentMemberName() string
-
 	// Readonly lock for disk full
 	Lock(context.Context, string) error
 	Unlock(context.Context) error
 
-	// sql query
 	Exec(context.Context, string) (int64, error)
 	Query(context.Context, string) ([]byte, error)
 
-	// user management
-	ListUsers(context.Context) ([]models.UserInfo, error)
-	ListSystemAccounts(context.Context) ([]models.UserInfo, error)
-	CreateUser(context.Context, string, string) error
-	DeleteUser(context.Context, string) error
-	DescribeUser(context.Context, string) (*models.UserInfo, error)
-	GrantUserRole(context.Context, string, string) error
-	RevokeUserRole(context.Context, string, string) error
-
 	GetPort() (int, error)
-
-	GetLogger() logr.Logger
 
 	ShutDownWithWait()
 }

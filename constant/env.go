@@ -27,8 +27,6 @@ import (
 
 // Lorry
 const (
-	KBEnvWorkloadType    = "KB_WORKLOAD_TYPE"
-	KBEnvBuiltinHandler  = "KB_BUILTIN_HANDLER"
 	KBEnvActionCommands  = "KB_ACTION_COMMANDS"
 	KBEnvEngineType      = "KB_ENGINE_TYPE"
 	KBEnvServiceUser     = "KB_SERVICE_USER"
@@ -38,15 +36,6 @@ const (
 
 	// KBEnvServicePort defines the port of the DB service
 	KBEnvServicePort = "KB_SERVICE_PORT"
-
-	// KBEnvTTL controls the lease expiration time in DCS. If the leader fails to renew its lease within the TTL duration, it will lose the leader role, allowing other replicas to take over.
-	KBEnvTTL = "KB_TTL"
-
-	// KBEnvMaxLag defines maximum replication lag permitted when performing a switchover.
-	KBEnvMaxLag = "KB_MAX_LAG"
-
-	// KBEnvEnableHA Whether to enable high availability, true by default.
-	KBEnvEnableHA = "KB_ENABLE_HA"
 
 	// KBEnvRsmRoleUpdateMechanism defines the method to send events: DirectAPIServerEventUpdate(through lorry service), ReadinessProbeEventUpdate(through kubelet service)
 	KBEnvRsmRoleUpdateMechanism = "KB_RSM_ROLE_UPDATE_MECHANISM"
