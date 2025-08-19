@@ -31,13 +31,9 @@ import (
 
 type DBManagerBase struct {
 	CurrentMemberName string
-	CurrentMemberIP   string
 	ClusterCompName   string
-	Namespace         string
-	DataDir           string
 	Logger            logr.Logger
 	DBStartupReady    bool
-	IsLocked          bool
 }
 
 func NewDBManagerBase(logger logr.Logger) (*DBManagerBase, error) {
@@ -48,9 +44,7 @@ func NewDBManagerBase(logger logr.Logger) (*DBManagerBase, error) {
 
 	mgr := DBManagerBase{
 		CurrentMemberName: currentMemberName,
-		CurrentMemberIP:   constant.GetPodIP(),
 		ClusterCompName:   constant.GetClusterCompName(),
-		Namespace:         constant.GetNamespace(),
 		Logger:            logger,
 	}
 	return &mgr, nil

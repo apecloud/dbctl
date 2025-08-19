@@ -32,7 +32,6 @@ import (
 const (
 	defaultEndpoint = "endpoint"
 
-	defaultPort        = 2379
 	defaultDialTimeout = 600 * time.Millisecond
 )
 

@@ -106,7 +106,6 @@ func mockDatabase(t *testing.T) (*Manager, sqlmock.Sqlmock, error) {
 		DBManagerBase: engines.DBManagerBase{
 			CurrentMemberName: fakePodName,
 			ClusterCompName:   fakeClusterCompName,
-			Namespace:         fakeNamespace,
 		},
 	}
 	development, _ := zap.NewDevelopment()

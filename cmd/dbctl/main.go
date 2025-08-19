@@ -40,12 +40,10 @@ import (
 	opsregister "github.com/apecloud/dbctl/operations/register"
 )
 
-var disableDNSChecker bool
 var engineType string
 
 func init() {
 	viper.AutomaticEnv()
-	pflag.BoolVar(&disableDNSChecker, "disable-dns-checker", false, "disable dns checker, for test&dev")
 	pflag.StringVar(&engineType, "engine", "", "Database engine type, e.g., mysql, postgres, mongodb, etc.")
 }
 

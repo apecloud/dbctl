@@ -32,7 +32,7 @@ import (
 	"github.com/apecloud/dbctl/operations"
 )
 
-// Server is an interface for the Lorry HTTP server.
+// Server is an interface for the dbctl HTTP server.
 type Server interface {
 	io.Closer
 	Router() fasthttp.RequestHandler

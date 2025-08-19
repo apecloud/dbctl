@@ -28,9 +28,6 @@ const (
 	ExecOperation  OperationKind = "exec"
 	QueryOperation OperationKind = "query"
 
-	PostProvisionOperation OperationKind = "postProvision"
-	PreTerminateOperation  OperationKind = "preTerminate"
-
 	OperationSuccess = "Success"
 	OperationFailed  = "Failed"
 )

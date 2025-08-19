@@ -24,7 +24,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
-	"github.com/shirou/gopsutil/v3/process"
 	"github.com/spf13/viper"
 	ctrl "sigs.k8s.io/controller-runtime"
 
@@ -35,7 +34,6 @@ type Manager struct {
 	engines.DBManagerBase
 	MajorVersion int
 	Pool         PgxPoolIFace
-	Proc         *process.Process
 	Config       *Config
 }
 
@@ -55,7 +53,6 @@ func NewManager() (engines.DBManager, error) {
 	if err != nil {
 		return nil, err
 	}
-	managerBase.DataDir = viper.GetString(PGDATA)
 
 	mgr := &Manager{
 		DBManagerBase: *managerBase,

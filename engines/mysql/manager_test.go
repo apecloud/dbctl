@@ -32,7 +32,6 @@ import (
 const (
 	fakePodName         = "fake-mysql-0"
 	fakeClusterCompName = "test-mysql"
-	fakeNamespace       = "fake-namespace"
 )
 
 func TestNewManager(t *testing.T) {
@@ -49,14 +48,12 @@ func TestNewManager(t *testing.T) {
 		manager, ok := managerIFace.(*Manager)
 		assert.True(t, ok)
 		assert.Equal(t, "pod-test-0", manager.CurrentMemberName)
-		assert.Equal(t, "namespace-test", manager.Namespace)
 		assert.Equal(t, "cluster-component-test", manager.ClusterCompName)
 		assert.Equal(t, uint(1), manager.serverID)
 	})
 
 	viper.Set(constant.KBEnvPodName, "fake")
 	viper.Set(constant.KBEnvClusterCompName, fakeClusterCompName)
-	viper.Set(constant.KBEnvNamespace, fakeNamespace)
 	t.Run("get server id failed", func(t *testing.T) {
 		manager, err := NewManager()
 

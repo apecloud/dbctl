@@ -35,7 +35,6 @@ import (
 const (
 	fakePodName         = "test-wesql-0"
 	fakeClusterCompName = "test-wesql"
-	fakeNamespace       = "fake-namespace"
 )
 
 func mockDatabase(t *testing.T) (*Manager, sqlmock.Sqlmock, error) {
@@ -44,7 +43,6 @@ func mockDatabase(t *testing.T) (*Manager, sqlmock.Sqlmock, error) {
 			DBManagerBase: engines.DBManagerBase{
 				CurrentMemberName: fakePodName,
 				ClusterCompName:   fakeClusterCompName,
-				Namespace:         fakeNamespace,
 				Logger:            ctrl.Log.WithName("WeSQL-TEST"),
 			},
 		},

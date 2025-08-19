@@ -24,17 +24,15 @@ import (
 )
 
 const (
-	errMsgNoUserName      = "no username provided"
-	errMsgNoPassword      = "no password provided"
-	errMsgNoRoleName      = "no rolename provided"
-	errMsgInvalidRoleName = "invalid rolename, should be one of [superuser, readwrite, readonly]"
-	errMsgNotImplemented  = "not implemented"
+	errMsgNoUserName     = "no username provided"
+	errMsgNoPassword     = "no password provided"
+	errMsgNoRoleName     = "no rolename provided"
+	errMsgNotImplemented = "not implemented"
 )
 
 var (
-	ErrNoUserName      = errors.New(errMsgNoUserName)
-	ErrNoPassword      = errors.New(errMsgNoPassword)
-	ErrNoRoleName      = errors.New(errMsgNoRoleName)
-	ErrInvalidRoleName = errors.New(errMsgInvalidRoleName)
-	ErrNotImplemented  = errors.New(errMsgNotImplemented)
+	ErrNoUserName     = errors.New(errMsgNoUserName)
+	ErrNoPassword     = errors.New(errMsgNoPassword)
+	ErrNoRoleName     = errors.New(errMsgNoRoleName)
+	ErrNotImplemented = errors.New(errMsgNotImplemented)
 )

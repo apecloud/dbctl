@@ -27,7 +27,6 @@ import (
 
 // Lorry
 const (
-	KBEnvActionCommands  = "KB_ACTION_COMMANDS"
 	KBEnvEngineType      = "KB_ENGINE_TYPE"
 	KBEnvServiceUser     = "KB_SERVICE_USER"
 	KBEnvServicePassword = "KB_SERVICE_PASSWORD"
@@ -40,26 +39,15 @@ const (
 
 // new envs for KB 1.0
 const (
-	EnvNamespace       = "MY_NAMESPACE"
 	EnvPodName         = "MY_POD_NAME"
-	EnvPodIP           = "MY_POD_IP"
-	EnvPodUID          = "MY_POD_UID"
-	EnvClusterName     = "MY_CLUSTER_NAME"
-	EnvComponentName   = "MY_COMP_NAME"
 	EnvClusterCompName = "MY_CLUSTER_COMP_NAME"
 )
 
 // old envs for KB 0.9
 const (
 	KBEnvNamespace       = "KB_NAMESPACE"
-	KBEnvClusterName     = "KB_CLUSTER_NAME"
 	KBEnvClusterCompName = "KB_CLUSTER_COMP_NAME"
-	KBEnvCompName        = "KB_COMP_NAME"
 	KBEnvPodName         = "KB_POD_NAME"
-	KBEnvPodUID          = "KB_POD_UID"
-	KBEnvPodIP           = "KB_POD_IP"
-	KBEnvPodFQDN         = "KB_POD_FQDN"
-	KBEnvNodeName        = "KB_NODENAME"
 )
 
 func GetPodName() string {
@@ -75,61 +63,6 @@ func GetPodName() string {
 	}
 }
 
-func GetPodIP() string {
-	switch {
-	case viper.IsSet(KBEnvPodIP):
-		return viper.GetString(KBEnvPodIP)
-	case viper.IsSet(EnvPodIP):
-		return viper.GetString(EnvPodIP)
-	default:
-		return ""
-	}
-}
-
-func GetPodUID() string {
-	switch {
-	case viper.IsSet(KBEnvPodUID):
-		return viper.GetString(KBEnvPodUID)
-	case viper.IsSet(EnvPodUID):
-		return viper.GetString(EnvPodUID)
-	default:
-		return ""
-	}
-}
-
-func GetNamespace() string {
-	switch {
-	case viper.IsSet(KBEnvNamespace):
-		return viper.GetString(KBEnvNamespace)
-	case viper.IsSet(EnvNamespace):
-		return viper.GetString(EnvNamespace)
-	default:
-		return ""
-	}
-}
-
-func GetClusterName() string {
-	switch {
-	case viper.IsSet(KBEnvClusterName):
-		return viper.GetString(KBEnvClusterName)
-	case viper.IsSet(EnvClusterName):
-		return viper.GetString(EnvClusterName)
-	default:
-		return ""
-	}
-}
-
-func GetComponentName() string {
-	switch {
-	case viper.IsSet(KBEnvCompName):
-		return viper.GetString(KBEnvCompName)
-	case viper.IsSet(EnvComponentName):
-		return viper.GetString(EnvComponentName)
-	default:
-		return ""
-	}
-}
-
 func GetClusterCompName() string {
 	switch {
 	case viper.IsSet(KBEnvClusterCompName):
@@ -140,3 +73,8 @@ func GetClusterCompName() string {
 		return ""
 	}
 }
+
+const (
+	ConfigKeyUserName = "username"
+	ConfigKeyPassword = "password"
+)
