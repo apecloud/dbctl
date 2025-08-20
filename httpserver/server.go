@@ -32,7 +32,7 @@ import (
 	"github.com/apecloud/dbctl/operations"
 )
 
-// Server is an interface for the Lorry HTTP server.
+// Server is an interface for the dbctl HTTP server.
 type Server interface {
 	io.Closer
 	Router() fasthttp.RequestHandler
@@ -67,7 +67,7 @@ func (s *server) StartNonBlocking() error {
 
 	var listeners []net.Listener
 	if s.config.UnixDomainSocket != "" {
-		socket := fmt.Sprintf("%s/lorry.socket", s.config.UnixDomainSocket)
+		socket := fmt.Sprintf("%s/dbctl.socket", s.config.UnixDomainSocket)
 		l, err := net.Listen("unix", socket)
 		if err != nil {
 			return err

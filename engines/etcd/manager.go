@@ -21,8 +21,6 @@ package etcd
 
 import (
 	"context"
-	"strconv"
-	"strings"
 	"time"
 
 	v3 "go.etcd.io/etcd/client/v3"
@@ -32,9 +30,8 @@ import (
 )
 
 const (
-	endpoint = "endpoint"
+	defaultEndpoint = "endpoint"
 
-	defaultPort        = 2379
 	defaultDialTimeout = 600 * time.Millisecond
 )
 
@@ -46,8 +43,11 @@ type Manager struct {
 
 var _ engines.DBManager = &Manager{}
 
-func NewManager(properties engines.Properties) (engines.DBManager, error) {
+func NewManager() (engines.DBManager, error) {
 	logger := ctrl.Log.WithName("ETCD")
+	properties := map[string]string{
+		defaultEndpoint: "127.0.0.1:2379",
+	}
 
 	managerBase, err := engines.NewDBManagerBase(logger)
 	if err != nil {
@@ -59,7 +59,7 @@ func NewManager(properties engines.Properties) (engines.DBManager, error) {
 	}
 
 	var endpoints []string
-	endpoint, ok := properties[endpoint]
+	endpoint, ok := properties[defaultEndpoint]
 	if ok {
 		mgr.endpoint = endpoint
 		endpoints = []string{endpoint}
@@ -93,17 +93,4 @@ func (mgr *Manager) IsDBStartupReady() bool {
 	mgr.DBStartupReady = true
 	mgr.Logger.Info("DB startup ready")
 	return true
-}
-
-func (mgr *Manager) GetRunningPort() int {
-	index := strings.Index(mgr.endpoint, ":")
-	if index < 0 {
-		return defaultPort
-	}
-	port, err := strconv.Atoi(mgr.endpoint[index+1:])
-	if err != nil {
-		return defaultPort
-	}
-
-	return port
 }

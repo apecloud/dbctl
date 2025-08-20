@@ -21,11 +21,8 @@ package register
 
 import (
 	"github.com/apecloud/dbctl/operations"
-	_ "github.com/apecloud/dbctl/operations/component"
 	_ "github.com/apecloud/dbctl/operations/replica"
 	_ "github.com/apecloud/dbctl/operations/sql"
-	_ "github.com/apecloud/dbctl/operations/user"
-	_ "github.com/apecloud/dbctl/operations/volume"
 )
 
 func Register(name string, op operations.Operation) error {

@@ -26,15 +26,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
 
-	"github.com/apecloud/dbctl/constant"
-	"github.com/apecloud/dbctl/dcs"
 	"github.com/apecloud/dbctl/engines/models"
 	"github.com/apecloud/dbctl/engines/register"
 )
-
-const ()
 
 var DatabaseCmd = &cobra.Command{
 	Use:     "database",
@@ -46,7 +41,6 @@ dbctl mongodb createuser --username root --password password
 	Args: cobra.MinimumNArgs(0),
 	PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 		commands := stripFlags(os.Args[1:], cmd)
-		// fmt.Println("commands: ", commands)
 		if len(commands) < 1 {
 			return errors.New("please specify a database subcommand")
 		}
@@ -54,12 +48,9 @@ dbctl mongodb createuser --username root --password password
 		if dbType == "database" {
 			return errors.New("please specify a database type supported by dbctl, the valid types are: " + strings.Join(models.GetEngineTypeListStr(), ", "))
 		}
-		viper.SetDefault(constant.KBEnvEngineType, commands[0])
 
-		// Initialize DCS (Distributed Control System)
-		_ = dcs.InitStore()
 		// Initialize DB Manager
-		err := register.InitDBManager(configDir)
+		err := register.InitDBManager(dbType)
 		if err != nil {
 			return errors.Wrap(err, "DB manager initialize failed")
 		}
@@ -100,7 +91,7 @@ func stripFlags(args []string, c *cobra.Command) []string {
 		return args
 	}
 
-	commands := []string{}
+	var commands []string
 	flags := c.Flags()
 
 Loop:

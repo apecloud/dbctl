@@ -285,7 +285,7 @@ func (m *Commands) ConnectExample(info *engines.ConnectionInfo, client string) s
 }
 
 func (m *Commands) ExecuteCommand(scripts []string) ([]string, []corev1.EnvVar, error) {
-	cmd := []string{}
+	var cmd []string
 	cmd = append(cmd, "/bin/sh", "-c", "-ex")
 	cmd = append(cmd, fmt.Sprintf("%s -u%s -p%s -e %s", m.info.Client,
 		fmt.Sprintf("$%s", engines.EnvVarMap[engines.USER]),

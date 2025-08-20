@@ -25,16 +25,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-const (
-	MinVotingMembers    = 1
-	MaxVotingMembers    = 7
-	MaxMembers          = 50
-	DefaultPriority     = 2
-	DefaultVotes        = 1
-	DefaultReadConcern  = "majority"
-	DefaultWriteConcern = "majority"
-)
-
 // ReplsetTags Set tags: https://docs.mongodb.com/manual/tutorial/configure-replica-set-tag-sets/#add-tag-sets-to-a-replica-set
 type ReplsetTags map[string]string
 
@@ -211,82 +201,3 @@ type StatusOptimes struct {
 
 type MemberHealth int
 type MemberState int
-
-const (
-	MemberHealthDown MemberHealth = iota
-	MemberHealthUp
-	MemberStateStartup    MemberState = 0
-	MemberStatePrimary    MemberState = 1
-	MemberStateSecondary  MemberState = 2
-	MemberStateRecovering MemberState = 3
-	MemberStateStartup2   MemberState = 5
-	MemberStateUnknown    MemberState = 6
-	MemberStateArbiter    MemberState = 7
-	MemberStateDown       MemberState = 8
-	MemberStateRollback   MemberState = 9
-	MemberStateRemoved    MemberState = 10
-)
-
-var MemberStateStrings = map[MemberState]string{
-	MemberStateStartup:    "STARTUP",
-	MemberStatePrimary:    "PRIMARY",
-	MemberStateSecondary:  "SECONDARY",
-	MemberStateRecovering: "RECOVERING",
-	MemberStateStartup2:   "STARTUP2",
-	MemberStateUnknown:    "UNKNOWN",
-	MemberStateArbiter:    "ARBITER",
-	MemberStateDown:       "DOWN",
-	MemberStateRollback:   "ROLLBACK",
-	MemberStateRemoved:    "REMOVED",
-}
-
-func (s *ReplSetStatus) GetMembersByState(state MemberState, limit int) []*Member {
-	members := make([]*Member, 0)
-	for _, member := range s.Members {
-		if member.State == state {
-			members = append(members, member)
-			if limit > 0 && len(members) == limit {
-				return members
-			}
-		}
-	}
-	return members
-}
-
-func (s *ReplSetStatus) Primary() *Member {
-	primary := s.GetMembersByState(MemberStatePrimary, 1)
-	if len(primary) == 1 {
-		return primary[0]
-	}
-	return nil
-}
-
-type RolePrivilege struct {
-	Resource map[string]interface{} `bson:"resource" json:"resource"`
-	Actions  []string               `bson:"actions" json:"actions"`
-}
-
-type Role struct {
-	Role       string                   `bson:"role" json:"role"`
-	DB         string                   `bson:"db" json:"db"`
-	IsBuiltin  string                   `bson:"isBuiltin" json:"isBuiltin"`
-	Roles      []map[string]interface{} `bson:"roles" json:"roles"`
-	Privileges []RolePrivilege          `bson:"privileges" json:"privileges"`
-}
-
-type RoleInfo struct {
-	Roles      []Role `bson:"roles" json:"roles"`
-	OKResponse `bson:",inline"`
-}
-
-type User struct {
-	ID    string                   `bson:"_id" json:"_id"`
-	User  string                   `bson:"user" json:"user"`
-	DB    string                   `bson:"db" json:"db"`
-	Roles []map[string]interface{} `bson:"roles" json:"roles"`
-}
-
-type UsersInfo struct {
-	Users      []User `bson:"users" json:"users"`
-	OKResponse `bson:",inline"`
-}

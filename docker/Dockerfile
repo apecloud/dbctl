@@ -41,8 +41,6 @@ RUN --mount=type=bind,target=. \
 FROM docker.io/alpine:3.22 as dist
 ARG APK_MIRROR
 
-# copy files
-COPY config/ /config/
 COPY --from=builder /out/dbctl /bin
 
 USER 65532:65532

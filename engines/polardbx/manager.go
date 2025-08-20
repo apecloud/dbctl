@@ -26,19 +26,15 @@ import (
 	"github.com/apecloud/dbctl/engines/mysql"
 )
 
-const (
-	PolardbXServiceType = "polardbx"
-)
-
 type Manager struct {
 	mysql.Manager
 }
 
 var _ engines.DBManager = &Manager{}
 
-func NewManager(properties engines.Properties) (engines.DBManager, error) {
+func NewManager() (engines.DBManager, error) {
 	logger := ctrl.Log.WithName("PolarDBX")
-	mysqlMgr, err := mysql.NewManager(properties)
+	mysqlMgr, err := mysql.NewManager()
 	if err != nil {
 		return nil, err
 	}

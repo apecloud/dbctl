@@ -45,7 +45,7 @@ func init() {
 	}
 }
 
-func (s *GetRole) Init(ctx context.Context) error {
+func (s *GetRole) Init(context.Context) error {
 	s.Logger = ctrl.Log.WithName("getrole")
 	dbManager, err := register.GetDBManager()
 	if err != nil {
@@ -72,6 +72,6 @@ func (s *GetRole) Do(ctx context.Context, req *operations.OpsRequest) (*operatio
 		return resp, err
 	}
 
-	resp.Data["role"] = role
+	resp.Role = role
 	return resp, err
 }

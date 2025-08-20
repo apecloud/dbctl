@@ -27,51 +27,14 @@ import (
 
 func TestGetMongoDBMetadata(t *testing.T) {
 	t.Run("With defaults", func(t *testing.T) {
-		properties := map[string]string{
-			host: "127.0.0.1",
-		}
-
-		metadata, err := NewConfig(properties)
+		metadata, err := NewConfig()
 		assert.Nil(t, err)
-		assert.Equal(t, properties[host], metadata.Hosts[0])
+		assert.Equal(t, "127.0.0.1:27017", metadata.Hosts[0])
 		assert.Equal(t, adminDatabase, metadata.DatabaseName)
-	})
-
-	t.Run("With custom values", func(t *testing.T) {
-		properties := map[string]string{
-			host:         "127.0.0.2",
-			databaseName: "TestDB",
-			username:     "username",
-			password:     "password",
-		}
-
-		metadata, err := NewConfig(properties)
-		assert.Nil(t, err)
-		assert.Equal(t, properties[host], metadata.Hosts[0])
-		assert.Equal(t, properties[databaseName], metadata.DatabaseName)
-		assert.Equal(t, properties[username], metadata.Username)
-		assert.Equal(t, properties[password], metadata.Password)
-	})
-
-	t.Run("Missing hosts", func(t *testing.T) {
-		properties := map[string]string{
-			username: "username",
-			password: "password",
-		}
-
-		_, err := NewConfig(properties)
-		assert.NotNil(t, err)
-	})
-
-	t.Run("Invalid without host/server", func(t *testing.T) {
-		properties := map[string]string{
-			databaseName: "TestDB",
-		}
-
-		_, err := NewConfig(properties)
-		assert.NotNil(t, err)
-
-		expected := "must set 'host' in metadata or KB_SERVICE_PORT environment variable"
-		assert.Equal(t, expected, err.Error())
+		assert.Equal(t, true, metadata.Direct)
+		assert.Equal(t, "root", metadata.Username)
+		assert.Equal(t, "", metadata.Password)
+		assert.Equal(t, "?directConnection=true", metadata.Params)
+		assert.Equal(t, defaultTimeout, metadata.OperationTimeout)
 	})
 }

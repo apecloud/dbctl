@@ -29,8 +29,8 @@ type Config struct {
 
 var config *Config
 
-func NewConfig(properties map[string]string) (*Config, error) {
-	mysqlConfig, err := mysql.NewConfig(properties)
+func NewConfig() (*Config, error) {
+	mysqlConfig, err := mysql.NewConfig()
 	if err != nil {
 		return nil, err
 	}

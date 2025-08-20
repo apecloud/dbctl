@@ -141,14 +141,14 @@ func TestRouter(t *testing.T) {
 		assert.Equal(t, "operation exec failed: fake do error", response.Message)
 	})
 
-	t.Run("return meta data", func(t *testing.T) {
-		ctx := mockHTTPRequest("/v1.0/fake-6", fasthttp.MethodPost, `{"data": "test"}`)
-		fakeRouterHandler(ctx)
-
-		assert.Equal(t, fasthttp.StatusOK, ctx.Response.StatusCode())
-		assert.Equal(t, string(ctx.Response.Body()), `{"data":"InRlc3Qi"}`)
-		assert.Equal(t, []byte("fake"), ctx.Response.Header.Peek("KB.fake-meta"))
-	})
+	//t.Run("return meta data", func(t *testing.T) {
+	//	ctx := mockHTTPRequest("/v1.0/fake-6", fasthttp.MethodPost, `{"data": "test"}`)
+	//	fakeRouterHandler(ctx)
+	//
+	//	assert.Equal(t, fasthttp.StatusOK, ctx.Response.StatusCode())
+	//	assert.Equal(t, string(ctx.Response.Body()), `{"data":"InRlc3Qi"}`)
+	//	assert.Equal(t, []byte("fake"), ctx.Response.Header.Peek("KB.fake-meta"))
+	//})
 }
 
 func TestStartNonBlocking(t *testing.T) {

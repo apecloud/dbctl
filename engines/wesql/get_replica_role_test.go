@@ -75,33 +75,3 @@ func TestGetRole(t *testing.T) {
 		t.Errorf("there were unfulfilled expectations: %v", err)
 	}
 }
-
-func TestGetClusterLocalInfo(t *testing.T) {
-	manager, mock, _ := mockDatabase(t)
-
-	t.Run("error executing sql", func(t *testing.T) {
-		mock.ExpectQuery("select *").
-			WillReturnError(fmt.Errorf("some error"))
-
-		clusterLocalInfo, err := manager.GetClusterLocalInfo()
-		assert.Nil(t, clusterLocalInfo)
-		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "some error")
-	})
-
-	t.Run("get cluster local info successfully", func(t *testing.T) {
-		mock.ExpectQuery("select *").
-			WillReturnRows(sqlmock.NewRows([]string{"CURRENT_LEADER", "ROLE", "SERVER_ID"}).AddRow("test-wesql-0", "leader", "1"))
-
-		clusterLocalInfo, err := manager.GetClusterLocalInfo()
-		assert.NotNil(t, clusterLocalInfo)
-		assert.Nil(t, err)
-		assert.Equal(t, "test-wesql-0", clusterLocalInfo.GetString("CURRENT_LEADER"))
-		assert.Equal(t, "leader", clusterLocalInfo.GetString("ROLE"))
-		assert.Equal(t, "1", clusterLocalInfo.GetString("SERVER_ID"))
-	})
-
-	if err := mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %v", err)
-	}
-}

@@ -32,8 +32,8 @@ type OpsRequest struct {
 }
 
 func (r *OpsRequest) GetString(key string) string {
-	value, ok := r.Parameters[key]
-	if ok {
+	value, exist := r.Parameters[key]
+	if exist {
 		val, ok := value.(string)
 		if ok {
 			return val
@@ -43,8 +43,8 @@ func (r *OpsRequest) GetString(key string) string {
 }
 
 func (r *OpsRequest) GetBool(key string) bool {
-	value, ok := r.Parameters[key]
-	if ok {
+	value, exist := r.Parameters[key]
+	if exist {
 		val, ok := value.(bool)
 		if ok {
 			return val
@@ -55,6 +55,7 @@ func (r *OpsRequest) GetBool(key string) bool {
 
 // OpsResponse is the response for Operation
 type OpsResponse struct {
+	Role     string            `json:"role,omitempty"`
 	Data     map[string]any    `json:"data,omitempty"`
 	Metadata map[string]string `json:"metadata,omitempty"`
 }

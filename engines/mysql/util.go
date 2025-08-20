@@ -90,8 +90,6 @@ type NamedResultData struct {
 	Data    ResultData
 }
 
-var EmptyResultData = ResultData{}
-
 func (rm *RowMap) GetString(key string) string {
 	return (*rm)[key].String
 }
@@ -221,7 +219,9 @@ func QueryRowsMap(db *sql.DB, query string, onRow func(RowMap) error, args ...in
 	var rows *sql.Rows
 	rows, err = db.Query(query, args...)
 	if rows != nil {
-		defer rows.Close()
+		defer func() {
+			_ = rows.Close()
+		}()
 	}
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return err

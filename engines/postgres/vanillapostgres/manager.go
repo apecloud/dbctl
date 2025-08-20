@@ -31,7 +31,6 @@ import (
 	"github.com/spf13/cast"
 	"github.com/spf13/viper"
 
-	"github.com/apecloud/dbctl/dcs"
 	"github.com/apecloud/dbctl/engines"
 	"github.com/apecloud/dbctl/engines/models"
 	"github.com/apecloud/dbctl/engines/postgres"
@@ -45,35 +44,16 @@ var _ engines.DBManager = &Manager{}
 
 var Mgr *Manager
 
-func NewManager(properties engines.Properties) (engines.DBManager, error) {
+func NewManager() (engines.DBManager, error) {
 	Mgr = &Manager{}
 
-	baseManager, err := postgres.NewManager(properties)
+	baseManager, err := postgres.NewManager()
 	if err != nil {
 		return nil, errors.Errorf("new base manager failed, err: %v", err)
 	}
 
 	Mgr.Manager = *baseManager.(*postgres.Manager)
 	return Mgr, nil
-}
-
-func (mgr *Manager) IsLeader(ctx context.Context, _ *dcs.Cluster) (bool, error) {
-	isSet, isLeader := mgr.GetIsLeader()
-	if isSet {
-		return isLeader, nil
-	}
-
-	return mgr.IsLeaderWithHost(ctx, "")
-}
-
-func (mgr *Manager) IsLeaderWithHost(ctx context.Context, host string) (bool, error) {
-	role, err := mgr.GetMemberRoleWithHost(ctx, host)
-	if err != nil {
-		return false, errors.Errorf("check is leader with host:%s failed, err:%v", host, err)
-	}
-
-	mgr.Logger.Info(fmt.Sprintf("get member:%s role:%s", host, role))
-	return role == models.PRIMARY, nil
 }
 
 func (mgr *Manager) IsDBStartupReady() bool {
@@ -94,10 +74,7 @@ func (mgr *Manager) IsDBStartupReady() bool {
 
 func (mgr *Manager) GetMemberRoleWithHost(ctx context.Context, host string) (string, error) {
 	getRoleFromPatroni := func() (string, error) {
-		patroniPort := "8008"
-		if viper.IsSet("PATRONI_PORT") {
-			patroniPort = viper.GetString("PATRONI_PORT")
-		}
+		patroniPort := viper.GetString("PATRONI_PORT")
 
 		resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:%s", patroniPort))
 		if err != nil {
@@ -123,7 +100,7 @@ func (mgr *Manager) GetMemberRoleWithHost(ctx context.Context, host string) (str
 		}
 	}
 
-	if viper.IsSet("PATRONIVERSION") {
+	if viper.IsSet("PATRONI_PORT") {
 		return getRoleFromPatroni()
 	}
 
@@ -146,34 +123,4 @@ func (mgr *Manager) GetMemberRoleWithHost(ctx context.Context, host string) (str
 	} else {
 		return models.PRIMARY, nil
 	}
-}
-
-func (mgr *Manager) IsMemberHealthy(ctx context.Context, cluster *dcs.Cluster, member *dcs.Member) bool {
-	var host string
-	if member.Name != mgr.CurrentMemberName {
-		host = cluster.GetMemberAddr(*member)
-	}
-
-	if cluster.Leader != nil && cluster.Leader.Name == member.Name {
-		if !mgr.WriteCheck(ctx, host) {
-			return false
-		}
-	}
-	if !mgr.ReadCheck(ctx, host) {
-		return false
-	}
-
-	return true
-}
-
-func (mgr *Manager) HasOtherHealthyMembers(ctx context.Context, cluster *dcs.Cluster, leader string) []*dcs.Member {
-	members := make([]*dcs.Member, 0)
-
-	for i, m := range cluster.Members {
-		if m.Name != leader && mgr.IsMemberHealthy(ctx, cluster, &m) {
-			members = append(members, &cluster.Members[i])
-		}
-	}
-
-	return members
 }

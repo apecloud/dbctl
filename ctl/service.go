@@ -22,10 +22,15 @@ package ctl
 import (
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
+	ctrl "sigs.k8s.io/controller-runtime"
+	kzap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/apecloud/dbctl/httpserver"
 	opsregister "github.com/apecloud/dbctl/operations/register"
@@ -39,6 +44,13 @@ dbctl service
   `,
 	Args: cobra.MinimumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
+		// Initialize logger
+		kOpts := []kzap.Opts{kzap.UseFlagOptions(&opts)}
+		if strings.EqualFold("debug", viper.GetString("zap-log-level")) {
+			kOpts = append(kOpts, kzap.RawZapOpts(zap.AddCaller()))
+		}
+		ctrl.SetLogger(kzap.New(kOpts...))
+
 		// start HTTP Server
 		ops := opsregister.Operations()
 		httpServer := httpserver.NewServer(ops)

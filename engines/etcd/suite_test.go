@@ -30,7 +30,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/go-logr/logr"
-	"github.com/golang/mock/gomock"
 	"github.com/spf13/viper"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/server/v3/embed"
@@ -39,7 +38,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	"github.com/apecloud/dbctl/constant"
-	"github.com/apecloud/dbctl/dcs"
 )
 
 const (
@@ -47,9 +45,7 @@ const (
 )
 
 var (
-	dcsStore     dcs.DCS
-	mockDCSStore *dcs.MockDCS
-	etcdServer   *EmbeddedETCD
+	etcdServer *EmbeddedETCD
 )
 
 func init() {
@@ -65,27 +61,9 @@ func TestETCDDBManager(t *testing.T) {
 	RunSpecs(t, "ETCD DBManager. Suite")
 }
 
-var _ = BeforeSuite(func() {
-	// Init mock dcs store
-	InitMockDCSStore()
-
-	// Start ETCD Server
-	// server, err := StartEtcdServer()
-	// Expect(err).Should(BeNil())
-	// etcdServer = server
-})
-
 var _ = AfterSuite(func() {
 	StopEtcdServer(etcdServer)
 })
-
-func InitMockDCSStore() {
-	ctrl := gomock.NewController(GinkgoT())
-	mockDCSStore = dcs.NewMockDCS(ctrl)
-	mockDCSStore.EXPECT().GetClusterFromCache().Return(&dcs.Cluster{}).AnyTimes()
-	dcs.SetStore(mockDCSStore)
-	dcsStore = mockDCSStore
-}
 
 func StartEtcdServer() (*EmbeddedETCD, error) {
 	peerAddress := "http://localhost:0"
@@ -143,5 +121,5 @@ func (e *EmbeddedETCD) Start(peerAddress string) error {
 func (e *EmbeddedETCD) Stop() {
 	e.ETCD.Close()
 	e.ETCD.Server.Stop()
-	os.RemoveAll(e.tmpDir)
+	_ = os.RemoveAll(e.tmpDir)
 }

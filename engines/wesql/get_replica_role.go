@@ -24,8 +24,6 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-
-	"github.com/apecloud/dbctl/engines/mysql"
 )
 
 func (mgr *Manager) GetReplicaRole(ctx context.Context) (string, error) {
@@ -57,19 +55,4 @@ func (mgr *Manager) GetReplicaRole(ctx context.Context) (string, error) {
 		return role, nil
 	}
 	return "", errors.Errorf("exec sql %s failed: no data returned", sql)
-}
-
-func (mgr *Manager) GetClusterLocalInfo() (mysql.RowMap, error) {
-	var result mysql.RowMap
-	sql := "select * from information_schema.wesql_cluster_local;"
-	err := mysql.QueryRowsMap(mgr.DB, sql, func(rMap mysql.RowMap) error {
-		result = rMap
-		return nil
-	})
-	if err != nil {
-		mgr.Logger.Error(err, fmt.Sprintf("error executing %s", sql))
-		return nil, err
-	}
-	return result, nil
-
 }

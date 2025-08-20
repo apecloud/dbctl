@@ -21,16 +21,12 @@ package postgres
 
 import (
 	"context"
-	"github.com/apecloud/dbctl/dcs"
-	"github.com/apecloud/dbctl/engines"
+
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/pkg/errors"
-)
 
-var (
-	ClusterHasNoLeader = errors.New("cluster has no leader now")
+	"github.com/apecloud/dbctl/engines"
 )
 
 const (
@@ -40,7 +36,6 @@ const (
 
 type PgBaseIFace interface {
 	GetMemberRoleWithHost(ctx context.Context, host string) (string, error)
-	IsMemberHealthy(ctx context.Context, cluster *dcs.Cluster, member *dcs.Member) bool
 	Query(ctx context.Context, sql string) (result []byte, err error)
 	Exec(ctx context.Context, sql string) (result int64, err error)
 }
@@ -61,11 +56,6 @@ type PgxPoolIFace interface {
 	PgxIFace
 	Acquire(ctx context.Context) (*pgxpool.Conn, error)
 	Close()
-}
-
-type ConsensusMemberHealthStatus struct {
-	Connected   bool
-	LogDelayNum int64
 }
 
 type PatroniResp struct {

@@ -19,22 +19,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package models
 
-import "strings"
-
 const (
 	PRIMARY   = "primary"
 	SECONDARY = "secondary"
 	MASTER    = "master"
 	SLAVE     = "slave"
-	LEADER    = "Leader"
-	FOLLOWER  = "Follower"
-	LEARNER   = "Learner"
-	CANDIDATE = "Candidate"
+	LEADER    = "leader"
+	FOLLOWER  = "follower"
+	LEARNER   = "learner"
+	CANDIDATE = "candidate"
 )
-
-// IsLikelyPrimaryRole returns true if the role is primary,
-// it is used for the case where db manager do not implemement the IsLeader method.
-// use it curefully, as it is for normal case, and may be wrong for some special cases.
-func IsLikelyPrimaryRole(role string) bool {
-	return strings.EqualFold(role, PRIMARY) || strings.EqualFold(role, MASTER) || strings.EqualFold(role, LEADER)
-}

@@ -22,20 +22,18 @@ package mysql
 import (
 	"context"
 
-	"github.com/apecloud/dbctl/engines/models"
+	"github.com/apecloud/kubeblocks/pkg/constant"
 )
+
+var semiSyncSourceVersion = "8.0.26"
 
 func (mgr *Manager) GetReplicaRole(ctx context.Context) (string, error) {
 	return mgr.GetReplicaRoleFromDB(ctx)
 }
 
 func (mgr *Manager) GetReplicaRoleFromDB(ctx context.Context) (string, error) {
-	slaveRunning, err := mgr.isSlaveRunning()
-	if err != nil {
-		return "", err
-	}
-	if slaveRunning {
-		return models.SECONDARY, nil
+	if mgr.isSlaveRunning(ctx) {
+		return constant.Secondary, nil
 	}
 
 	hasSlave, err := mgr.hasSlaveHosts()
@@ -43,34 +41,38 @@ func (mgr *Manager) GetReplicaRoleFromDB(ctx context.Context) (string, error) {
 		return "", err
 	}
 	if hasSlave {
-		return models.PRIMARY, nil
+		return constant.Primary, nil
 	}
 
-	isReadonly, err := mgr.IsReadonly(ctx, nil, nil)
+	isReadonly, err := mgr.IsReadonly(ctx)
 	if err != nil {
 		return "", err
 	}
 	if isReadonly {
-		// TODO: in case of diskFull lock, database will be set readonly,
+		// TODO: in case of diskfull lock, dababase will be set readonly,
 		// how to deal with this situation
-		return models.SECONDARY, nil
+		return constant.Secondary, nil
 	}
 
-	return models.PRIMARY, nil
+	return constant.Primary, nil
 }
 
-func (mgr *Manager) isSlaveRunning() (bool, error) {
+func (mgr *Manager) isSlaveRunning(ctx context.Context) bool {
 	var rowMap = mgr.slaveStatus
 
 	if len(rowMap) == 0 {
-		return false, nil
+		return false
 	}
 	ioRunning := rowMap.GetString("Slave_IO_Running")
 	sqlRunning := rowMap.GetString("Slave_SQL_Running")
-	if ioRunning == "Yes" || sqlRunning == "Yes" {
-		return true, nil
+	if use, _ := mgr.UseSourceReplica(ctx); use {
+		ioRunning = rowMap.GetString("Replica_IO_Running")
+		sqlRunning = rowMap.GetString("Replica_SQL_Running")
 	}
-	return false, nil
+	if ioRunning == "Yes" || sqlRunning == "Yes" {
+		return true
+	}
+	return false
 }
 
 func (mgr *Manager) hasSlaveHosts() (bool, error) {
@@ -90,5 +92,16 @@ func (mgr *Manager) hasSlaveHosts() (bool, error) {
 		return false, nil
 	}
 
+	return true, nil
+}
+
+func (mgr *Manager) UseSourceReplica(ctx context.Context) (bool, error) {
+	version, err := mgr.GetVersion(ctx)
+	if err != nil {
+		return false, err
+	}
+	if IsBeforeVersion(version, semiSyncSourceVersion) {
+		return false, nil
+	}
 	return true, nil
 }

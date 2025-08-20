@@ -31,7 +31,7 @@ DOCKERFILE_DIR?=./docker
 BUILDX_PLATFORMS ?= linux/amd64,linux/arm64
 
 # Image URL to use all building/pushing image targets
-LORRY_IMG ?= docker.io/apecloud/$(APP_NAME)
+DBCTL_IMG ?= docker.io/apecloud/$(APP_NAME)
 
 # Update whenever you upgrade dev container image
 DEV_CONTAINER_VERSION_TAG ?= latest
@@ -45,30 +45,30 @@ DOCKER_BUILD_ARGS ?=
 DOCKER_BUILD_ARGS += $(GO_BUILD_ARGS) $(BUILD_ARGS)
 
 
-.PHONY: build-lorry-image
-build-lorry-image: install-docker-buildx ## Build lorry container image.
+.PHONY: build-dbctl-image
+build-dbctl-image: install-docker-buildx ## Build dbctl container image.
 ifneq ($(BUILDX_ENABLED), true)
-	$(DOCKER) build . $(DOCKER_BUILD_ARGS) --file $(DOCKERFILE_DIR)/Dockerfile --tag ${LORRY_IMG}:${VERSION} --tag ${LORRY_IMG}:latest
+	$(DOCKER) build . $(DOCKER_BUILD_ARGS) --file $(DOCKERFILE_DIR)/Dockerfile --tag ${DBCTL_IMG}:${VERSION} --tag ${DBCTL_IMG}:latest
 else
 ifeq ($(TAG_LATEST), true)
-	$(DOCKER) buildx build . $(DOCKER_BUILD_ARGS) --file $(DOCKERFILE_DIR)/Dockerfile --platform $(BUILDX_PLATFORMS) --tag ${LORRY_IMG}:latest
+	$(DOCKER) buildx build . $(DOCKER_BUILD_ARGS) --file $(DOCKERFILE_DIR)/Dockerfile --platform $(BUILDX_PLATFORMS) --tag ${DBCTL_IMG}:latest
 else
-	$(DOCKER) buildx build . $(DOCKER_BUILD_ARGS) --file $(DOCKERFILE_DIR)/Dockerfile --platform $(BUILDX_PLATFORMS) --tag ${LORRY_IMG}:${VERSION}
+	$(DOCKER) buildx build . $(DOCKER_BUILD_ARGS) --file $(DOCKERFILE_DIR)/Dockerfile --platform $(BUILDX_PLATFORMS) --tag ${DBCTL_IMG}:${VERSION}
 endif
 endif
 
-.PHONY: push-lorry-image
-push-lorry-image: install-docker-buildx ## Push lorry container image.
+.PHONY: push-dbctl-image
+push-dbctl-image: install-docker-buildx ## Push dbctl container image.
 ifneq ($(BUILDX_ENABLED), true)
 ifeq ($(TAG_LATEST), true)
-	$(DOCKER) push ${LORRY_IMG}:latest
+	$(DOCKER) push ${DBCTL_IMG}:latest
 else
-	$(DOCKER) push ${LORRY_IMG}:${VERSION}
+	$(DOCKER) push ${DBCTL_IMG}:${VERSION}
 endif
 else
 ifeq ($(TAG_LATEST), true)
-	$(DOCKER) buildx build . $(DOCKER_BUILD_ARGS) --file $(DOCKERFILE_DIR)/Dockerfile --platform $(BUILDX_PLATFORMS) --tag ${LORRY_IMG}:latest --push
+	$(DOCKER) buildx build . $(DOCKER_BUILD_ARGS) --file $(DOCKERFILE_DIR)/Dockerfile --platform $(BUILDX_PLATFORMS) --tag ${DBCTL_IMG}:latest --push
 else
-	$(DOCKER) buildx build . $(DOCKER_BUILD_ARGS) --file $(DOCKERFILE_DIR)/Dockerfile --platform $(BUILDX_PLATFORMS) --tag ${LORRY_IMG}:${VERSION} --push
+	$(DOCKER) buildx build . $(DOCKER_BUILD_ARGS) --file $(DOCKERFILE_DIR)/Dockerfile --platform $(BUILDX_PLATFORMS) --tag ${DBCTL_IMG}:${VERSION} --push
 endif
 endif

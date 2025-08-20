@@ -24,8 +24,6 @@ import (
 	"crypto/x509"
 	"database/sql"
 	"fmt"
-	"net"
-	"strconv"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -39,21 +37,6 @@ import (
 const (
 	// configurations to connect to MySQL, either a data source name represent by URL.
 	connectionURLKey = "url"
-
-	// To connect to MySQL running over SSL you have to download a
-	// SSL certificate. If this is provided the driver will connect using
-	// SSL. If you have disabled SSL you can leave this empty.
-	// When the user provides a pem path their connection string must end with
-	// &tls=custom
-	// The connection string should be in the following format
-	// "%s:%s@tcp(%s:3306)/%s?allowNativePasswords=true&tls=custom",'myadmin@mydemoserver', 'yourpassword', 'mydemoserver.mysql.database.azure.com', 'targetdb'.
-	pemPathKey = "pemPath"
-
-	// other general settings for DB connections.
-	maxIdleConnsKey    = "maxIdleConns"
-	maxOpenConnsKey    = "maxOpenConns"
-	connMaxLifetimeKey = "connMaxLifetime"
-	connMaxIdleTimeKey = "connMaxIdleTime"
 )
 
 const (
@@ -64,74 +47,39 @@ const (
 )
 
 type Config struct {
-	URL             string
-	Port            string
-	Username        string
-	Password        string
-	pemPath         string
-	maxIdleConns    int
-	maxOpenConns    int
-	connMaxLifetime time.Duration
-	connMaxIdletime time.Duration
+	URL                 string
+	Port                string
+	Username            string
+	Password            string
+	pemPath             string
+	MaxIdleConns        int
+	MaxOpenConns        int
+	AdminUsername       string
+	AdminPassword       string
+	ReplicationUsername string
+	ReplicationPassword string
 }
 
 var fs = afero.NewOsFs()
 
 var config *Config
 
-func NewConfig(properties map[string]string) (*Config, error) {
-	config = &Config{}
-
-	if val, ok := properties[connectionURLKey]; ok && val != "" {
-		config.URL = val
-	} else {
-		config.URL = "root:@tcp(127.0.0.1:3306)/mysql?multiStatements=true"
+func NewConfig() (*Config, error) {
+	config = &Config{
+		URL:          "root:@tcp(127.0.0.1:3306)/mysql?multiStatements=true",
+		MaxIdleConns: 1,
+		MaxOpenConns: 5,
 	}
 
-	if viper.IsSet(constant.KBEnvServiceUser) {
-		config.Username = viper.GetString(constant.KBEnvServiceUser)
-	} else if viper.IsSet(EnvRootUser) {
-		config.Username = viper.GetString(EnvRootUser)
-	} else if username, ok := properties["username"]; ok {
-		config.Username = username
-	}
-
-	if viper.IsSet(constant.KBEnvServicePassword) {
-		config.Password = viper.GetString(constant.KBEnvServicePassword)
-	} else if viper.IsSet(EnvRootPass) {
-		config.Password = viper.GetString(EnvRootPass)
-	}
+	config.Username = getRootUserName()
+	config.Password = getRootPassword()
+	config.AdminUsername = getAdminUserName()
+	config.AdminPassword = getAdminPassword()
+	config.ReplicationUsername = getReplicationUserName()
+	config.ReplicationPassword = getReplicationPassword()
 
 	if viper.IsSet(constant.KBEnvServicePort) {
 		config.Port = viper.GetString(constant.KBEnvServicePort)
-	}
-
-	if val, ok := properties[pemPathKey]; ok {
-		config.pemPath = val
-	}
-
-	if val, ok := properties[maxIdleConnsKey]; ok {
-		if i, err := strconv.Atoi(val); err == nil {
-			config.maxIdleConns = i
-		}
-	}
-
-	if val, ok := properties[maxOpenConnsKey]; ok {
-		if i, err := strconv.Atoi(val); err == nil {
-			config.maxOpenConns = i
-		}
-	}
-
-	if val, ok := properties[connMaxLifetimeKey]; ok {
-		if d, err := time.ParseDuration(val); err == nil {
-			config.connMaxLifetime = d
-		}
-	}
-
-	if val, ok := properties[connMaxIdleTimeKey]; ok {
-		if d, err := time.ParseDuration(val); err == nil {
-			config.connMaxIdletime = d
-		}
 	}
 
 	if config.pemPath != "" {
@@ -154,6 +102,56 @@ func NewConfig(properties map[string]string) (*Config, error) {
 	return config, nil
 }
 
+func getRootUserName() string {
+	if viper.IsSet(constant.KBEnvServiceUser) {
+		return viper.GetString(constant.KBEnvServiceUser)
+	} else if viper.IsSet(EnvRootUser) {
+		return viper.GetString(EnvRootUser)
+	}
+	return ""
+}
+
+func getRootPassword() string {
+	if viper.IsSet(constant.KBEnvServicePassword) {
+		return viper.GetString(constant.KBEnvServicePassword)
+	} else if viper.IsSet(EnvRootPass) {
+		return viper.GetString(EnvRootPass)
+	}
+	return ""
+}
+
+func getAdminUserName() string {
+	// if the user is not set, use the root user
+	if viper.IsSet("MYSQL_ADMIN_USER") {
+		return viper.GetString("MYSQL_ADMIN_USER")
+	}
+	return getRootUserName()
+}
+
+func getAdminPassword() string {
+	// if the password is not set, use the root password
+	if viper.IsSet("MYSQL_ADMIN_PASSWORD") {
+		return viper.GetString("MYSQL_ADMIN_PASSWORD")
+	}
+	return getRootPassword()
+}
+
+func getReplicationUserName() string {
+	// if the user is not set, use the admin user
+	if viper.IsSet("MYSQL_REPLICATION_USER") {
+		return viper.GetString("MYSQL_REPLICATION_USER")
+	}
+	return getAdminUserName()
+}
+
+func getReplicationPassword() string {
+	// if the password is not set, use the admin password
+	if viper.IsSet("MYSQL_REPLICATION_PASSWORD") {
+		return viper.GetString("MYSQL_REPLICATION_PASSWORD")
+	}
+	return getAdminPassword()
+}
+
 func (config *Config) GetLocalDBConn() (*sql.DB, error) {
 	mysqlConfig, err := mysql.ParseDSN(config.URL)
 	if err != nil {
@@ -173,46 +171,4 @@ func (config *Config) GetLocalDBConn() (*sql.DB, error) {
 	}
 
 	return db, nil
-}
-
-func (config *Config) GetDBConnWithAddr(addr string) (*sql.DB, error) {
-	mysqlConfig, err := mysql.ParseDSN(config.URL)
-	if err != nil {
-		return nil, errors.Wrapf(err, "illegal Data Source Name (DNS) specified by %s", connectionURLKey)
-	}
-	mysqlConfig.User = config.Username
-	mysqlConfig.Passwd = config.Password
-	mysqlConfig.Timeout = time.Second * 5
-	mysqlConfig.ReadTimeout = time.Second * 5
-	mysqlConfig.WriteTimeout = time.Second * 5
-	mysqlConfig.Addr = addr
-	db, err := GetDBConnection(mysqlConfig.FormatDSN())
-	if err != nil {
-		return nil, errors.Wrap(err, "get DB connection failed")
-	}
-
-	return db, nil
-}
-
-func (config *Config) GetDBPort() int {
-	mysqlConfig, err := mysql.ParseDSN(config.URL)
-	if err != nil {
-		return defaultDBPort
-	}
-
-	_, portStr, err := net.SplitHostPort(mysqlConfig.Addr)
-	if err != nil {
-		return defaultDBPort
-	}
-
-	port, err := strconv.Atoi(portStr)
-	if err != nil {
-		return defaultDBPort
-	}
-
-	return port
-}
-
-func GetConfig() *Config {
-	return config
 }

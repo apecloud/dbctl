@@ -36,13 +36,6 @@ const (
 	SYMFONY ClientType = "symfony"
 )
 
-func ClientTypes() []string {
-	return []string{CLI.String(), DJANGO.String(), DOTNET.String(), GO.String(),
-		JAVA.String(), NODEJS.String(), PHP.String(), PRISMA.String(),
-		PYTHON.String(), RAILS.String(), RUST.String(), SYMFONY.String(),
-	}
-}
-
 func (t ClientType) String() string {
 	return string(t)
 }

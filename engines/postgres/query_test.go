@@ -26,8 +26,6 @@ import (
 
 	"github.com/pashagolub/pgxmock/v2"
 	"github.com/stretchr/testify/assert"
-
-	"github.com/apecloud/dbctl/dcs"
 )
 
 const (
@@ -72,39 +70,6 @@ func TestQuery(t *testing.T) {
 		resp, err := manager.QueryWithHost(ctx, sql, "localhost")
 		assert.NotNil(t, err)
 		assert.Nil(t, resp)
-	})
-
-	t.Run("query leader success", func(t *testing.T) {
-		sql := queryTest
-		mock.ExpectQuery("select").
-			WillReturnRows(pgxmock.NewRows([]string{"1"}).AddRow("1"))
-		cluster := &dcs.Cluster{
-			Leader: &dcs.Leader{
-				Name: manager.CurrentMemberName,
-			},
-		}
-		cluster.Members = append(cluster.Members, dcs.Member{
-			Name: manager.CurrentMemberName,
-		})
-
-		resp, err := manager.QueryLeader(ctx, sql, cluster)
-		if err != nil {
-			t.Errorf("expect query leader success but failed")
-		}
-
-		assert.Equal(t, []byte(`[{"1":"1"}]`), resp)
-	})
-
-	t.Run("query leader failed, cluster has no leader", func(t *testing.T) {
-		sql := queryTest
-		cluster := &dcs.Cluster{}
-
-		_, err := manager.QueryLeader(ctx, sql, cluster)
-		if err == nil {
-			t.Errorf("expect query leader success but failed")
-		}
-
-		assert.ErrorIs(t, ClusterHasNoLeader, err)
 	})
 
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -162,38 +127,6 @@ func TestExec(t *testing.T) {
 			t.Errorf("expect query failed, but success")
 		}
 		assert.Equal(t, int64(0), resp)
-	})
-
-	t.Run("exec leader success", func(t *testing.T) {
-		sql := execTest
-		mock.ExpectExec("create").
-			WillReturnResult(pgxmock.NewResult("CREATE", 1))
-		cluster := &dcs.Cluster{
-			Leader: &dcs.Leader{
-				Name: manager.CurrentMemberName,
-			},
-		}
-		cluster.Members = append(cluster.Members, dcs.Member{
-			Name: manager.CurrentMemberName,
-		})
-
-		resp, err := manager.ExecLeader(ctx, sql, cluster)
-		if err != nil {
-			t.Errorf("expect exec leader success but failed")
-		}
-		assert.Equal(t, int64(1), resp)
-	})
-
-	t.Run("exec leader failed, cluster has no leader", func(t *testing.T) {
-		sql := execTest
-		cluster := &dcs.Cluster{}
-
-		_, err := manager.ExecLeader(ctx, sql, cluster)
-		if err == nil {
-			t.Errorf("expect exec leader success but failed")
-		}
-
-		assert.ErrorIs(t, ClusterHasNoLeader, err)
 	})
 
 	if err := mock.ExpectationsWereMet(); err != nil {

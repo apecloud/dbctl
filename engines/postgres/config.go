@@ -25,85 +25,73 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
-
-	"github.com/apecloud/dbctl/constant"
-	"github.com/apecloud/dbctl/dcs"
 )
 
 const (
 	ConnectionURLKey = "url"
 	DefaultPort      = 5432
 	EnvRootUser      = "POSTGRES_USER"
-	EnvRootPass      = "POSTGRES_PASSWORD"
+	EnvRootPassword  = "POSTGRES_PASSWORD"
+
+	DefaultUrl                  = "user=postgres password=docker host=localhost port=5432 dbname=postgres pool_min_conns=1 pool_max_conns=10"
+	DefaultMaxConnectionTimeout = "5"
 )
 
 type Config struct {
-	URL            string
-	Username       string
-	Password       string
-	Host           string
-	Port           int
-	Database       string
-	MaxConnections int32
-	MinConnections int32
+	url            string
+	username       string
+	password       string
+	host           string
+	port           int
+	database       string
+	maxConnections int32
+	minConnections int32
+	connectTimeout string
 	pgxConfig      *pgxpool.Config
 }
 
 var config *Config
 
-func NewConfig(properties map[string]string) (*Config, error) {
+func NewConfig() (*Config, error) {
 	config = &Config{}
 
-	url, ok := properties[ConnectionURLKey]
-	if !ok || url == "" {
-		return nil, errors.Errorf("required metadata not set: %s", ConnectionURLKey)
-	}
-
-	poolConfig, err := pgxpool.ParseConfig(url)
+	poolConfig, err := pgxpool.ParseConfig(DefaultUrl)
 	if err != nil {
 		return nil, errors.Errorf("error opening DB connection: %v", err)
 	}
 
-	config.Username = poolConfig.ConnConfig.User
-	config.Password = poolConfig.ConnConfig.Password
-	config.Host = poolConfig.ConnConfig.Host
-	config.Port = int(poolConfig.ConnConfig.Port)
-	config.Database = poolConfig.ConnConfig.Database
-	config.MaxConnections = poolConfig.MaxConns
-	config.MinConnections = poolConfig.MinConns
+	config.username = poolConfig.ConnConfig.User
+	config.password = poolConfig.ConnConfig.Password
+	config.host = poolConfig.ConnConfig.Host
+	config.port = int(poolConfig.ConnConfig.Port)
+	config.database = poolConfig.ConnConfig.Database
+	config.maxConnections = poolConfig.MaxConns
+	config.minConnections = poolConfig.MinConns
+	config.connectTimeout = DefaultMaxConnectionTimeout
 
-	if viper.IsSet(constant.KBEnvServiceUser) {
-		config.Username = viper.GetString(constant.KBEnvServiceUser)
-	} else if viper.IsSet(EnvRootUser) {
-		config.Username = viper.GetString(EnvRootUser)
+	if viper.IsSet(EnvRootUser) {
+		config.username = viper.GetString(EnvRootUser)
+	}
+	if viper.IsSet(EnvRootPassword) {
+		config.password = viper.GetString(EnvRootPassword)
 	}
 
-	if viper.IsSet(constant.KBEnvServicePassword) {
-		config.Password = viper.GetString(constant.KBEnvServicePassword)
-	} else if viper.IsSet(EnvRootPass) {
-		config.Password = viper.GetString(EnvRootPass)
-	}
-
-	config.URL = config.GetConnectURLWithHost(config.Host)
-	pgxConfig, _ := pgxpool.ParseConfig(config.URL)
+	config.url = config.GetConnectURLWithHost(config.host)
+	pgxConfig, _ := pgxpool.ParseConfig(config.url)
 	config.pgxConfig = pgxConfig
 
 	return config, nil
 }
 
 func (config *Config) GetDBPort() int {
-	if config.Port == 0 {
+	if config.port == 0 {
 		return DefaultPort
 	}
 
-	return config.Port
+	return config.port
 }
 
 func (config *Config) GetConnectURLWithHost(host string) string {
 	return fmt.Sprintf("user=%s password=%s host=%s port=%d dbname=%s",
-		config.Username, config.Password, host, config.Port, config.Database)
-}
-
-func (config *Config) GetConsensusIPPort(cluster *dcs.Cluster, name string) string {
-	return fmt.Sprintf("%s.%s-headless.%s.svc:1%d", name, cluster.ClusterCompName, cluster.Namespace, config.GetDBPort())
+		config.username, config.password, host, config.port, config.database)
 }
