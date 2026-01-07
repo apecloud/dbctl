@@ -128,14 +128,6 @@ func NewManager() (engines.DBManager, error) {
 		return nil, err
 	}
 
-	if viper.GetString("REDIS_ADVERTISED_PORT") != "" {
-		port, err := mgr.getAdvertisedPort(viper.GetString("REDIS_ADVERTISED_PORT"))
-		if err != nil {
-			return nil, err
-		}
-		mgr.currentRedisPort = port
-	}
-
 	majorVersion, err := getRedisMajorVersion()
 	if err != nil {
 		return nil, err
@@ -146,8 +138,9 @@ func NewManager() (engines.DBManager, error) {
 	}
 
 	defaultSettings := &Settings{
-		Password: redisPasswd,
-		Username: redisUser,
+		Password:  redisPasswd,
+		Username:  redisUser,
+		EnableTLS: viper.GetBool("TLS_ENABLED"),
 	}
 	mgr.client, mgr.clientSettings, err = ParseClientFromProperties(properties, defaultSettings)
 	if err != nil {
