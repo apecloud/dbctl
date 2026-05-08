@@ -185,6 +185,13 @@ func newSentinelClient(s *Settings, clusterCompName string, majorVersion int) *r
 		PoolTimeout:     time.Duration(s.PoolTimeout),
 	}
 
+	/* #nosec */
+	if s.EnableTLS {
+		opt.TLSConfig = &tls.Config{
+			InsecureSkipVerify: s.EnableTLS,
+		}
+	}
+
 	sentinelClient := redis.NewSentinelClient(opt)
 
 	return sentinelClient
